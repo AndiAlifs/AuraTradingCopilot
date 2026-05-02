@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"aura-trade/internal/models"
 )
@@ -15,6 +16,8 @@ import (
 // ollamaBaseURL is the Ollama local server address.
 func ollamaBaseURL() string {
 	if u := os.Getenv("OLLAMA_BASE_URL"); u != "" {
+		u = strings.TrimSuffix(u, "/")
+		u = strings.TrimSuffix(u, "/api")
 		return u
 	}
 	return "http://localhost:11434"

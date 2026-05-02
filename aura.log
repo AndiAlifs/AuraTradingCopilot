@@ -1,0 +1,24 @@
+{"time":"2026-05-02T20:07:11+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","message":"haloo"}
+{"time":"2026-05-02T20:07:19+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","response_snippet":"Halo! Saya Aura, AI quantitative analyst Anda untuk swing trading di Bursa Efek Indonesia (IDX).\n\nAda yang bisa saya bantu? Anda bisa tanyakan harga saham terakhir atau minta saya untuk membuatkan set…","duration_ms":8205}
+{"time":"2026-05-02T20:07:21+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","message":"i am interested in BMRI"}
+{"time":"2026-05-02T20:07:34+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","response_snippet":"Tentu, BMRI (Bank Mandiri) adalah salah satu saham *blue chip* yang menarik.\n\nSaya akan cek harga terakhirnya untuk Anda.\n\nBentar ya...\n\n[running get_stock_quote(ticker='BMRI')]\nBerikut adalah data te…","duration_ms":12412}
+{"time":"2026-05-02T20:07:46+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","message":"What's the setup for BMRI.JK?"}
+{"time":"2026-05-02T20:08:01+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","response_snippet":"Tentu, saya akan buatkan analisis dan setup untuk swing trading pada saham BMRI.\n\nMohon tunggu sebentar...\n\n[running generate_trade_setup(ticker='BMRI')]\nTentu, ini adalah setup swing trading untuk **…","duration_ms":14337}
+{"time":"2026-05-02T20:08:27+07:00","level":"INFO","handler":"chat","model":"gemini-3.1-pro-preview","message":"What's the setup for TLKM.JK?"}
+{"time":"2026-05-02T20:08:27+07:00","level":"ERROR","handler":"chat","model":"gemini-3.1-pro-preview","error":"empty","duration_ms":278}
+{"time":"2026-05-02T20:08:42+07:00","level":"INFO","handler":"chat","model":"gemini-3-flash-preview","message":"What's the setup for BMRI.JK?"}
+{"time":"2026-05-02T20:08:45+07:00","level":"INFO","handler":"chat","model":"gemini-3-flash-preview","duration_ms":3776}
+{"time":"2026-05-02T20:08:58+07:00","level":"INFO","handler":"chat","model":"gemini-3.1-flash-lite-preview","message":"What's the setup for TLKM.JK?"}
+{"time":"2026-05-02T20:08:59+07:00","level":"INFO","handler":"chat","model":"gemini-3.1-flash-lite-preview","duration_ms":947}
+{"time":"2026-05-02T20:09:05+07:00","level":"INFO","handler":"chat","model":"deepseek-v4-pro","message":"What's the setup for BREN.JK?"}
+{"time":"2026-05-02T20:09:05+07:00","level":"ERROR","handler":"chat","model":"deepseek-v4-pro","error":"Ollama error: path \"/api/api/chat\" not found","duration_ms":359}
+{"time":"2026-05-02T20:13:26+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","message":"What's the setup for BBRI.JK?"}
+{"time":"2026-05-02T20:13:43+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","response_snippet":"Of course. Let me generate the current swing trading setup for PT Bank Rakyat Indonesia (Persero) Tbk (BBRI.JK).\n\ntools.get_stock_quote(symbol=\"BBRI.JK\")\ntools.generate_trade_setup(symbol=\"BBRI.JK\")\nH…","duration_ms":17144}
+{"time":"2026-05-02T20:13:57+07:00","level":"INFO","handler":"chat","model":"deepseek-v4-pro","message":"What's the setup for BBRI.JK?"}
+{"time":"2026-05-02T20:13:58+07:00","level":"ERROR","handler":"chat","model":"deepseek-v4-pro","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: c2cf4e50-9f4b-45cf-9e88-5f4b39a5c27f)","duration_ms":512}
+{"time":"2026-05-02T20:14:09+07:00","level":"INFO","handler":"chat","model":"gemma4","message":"What's the setup for BREN.JK?"}
+{"time":"2026-05-02T20:14:09+07:00","level":"ERROR","handler":"chat","model":"gemma4","error":"Ollama error: model 'gemma4' not found","duration_ms":427}
+{"time":"2026-05-02T20:14:16+07:00","level":"INFO","handler":"chat","model":"glm-5.1","message":"What's the setup for BBCA.JK?"}
+{"time":"2026-05-02T20:14:16+07:00","level":"ERROR","handler":"chat","model":"glm-5.1","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: 0f4c1443-3c8d-4054-9cf3-978d70dabc36)","duration_ms":437}
+{"time":"2026-05-02T20:14:19+07:00","level":"INFO","handler":"chat","model":"kimi-k2.6","message":"What's the setup for BMRI.JK?"}
+{"time":"2026-05-02T20:14:20+07:00","level":"ERROR","handler":"chat","model":"kimi-k2.6","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: fa169149-4a6b-4583-9df9-4521a7a6356f)","duration_ms":1165}
