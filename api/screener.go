@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"aura-trade/internal/yahoo"
 )
 
-// idxUniverse is the screener candidate pool
 var idxUniverse = []string{
 	"BBCA.JK", "BBRI.JK", "BMRI.JK", "TLKM.JK", "ASII.JK",
 	"BREN.JK", "GOTO.JK", "UNVR.JK", "ICBP.JK", "HMSP.JK",
@@ -26,10 +27,10 @@ type ScreenerResult struct {
 	MA50          float64 `json:"ma50"`
 	MACD          float64 `json:"macd"`
 	MACDSignal    float64 `json:"macdSignal"`
-	Signal        string  `json:"signal"` // "bullish" | "bearish" | "neutral"
+	Signal        string  `json:"signal"`
 }
 
-func ScreenerHandler(w http.ResponseWriter, r *http.Request) {
+func Handler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -53,8 +54,6 @@ func screenTickers(minPrice, maxPrice float64, minVol int64, minRSI, maxRSI floa
 	var mu sync.Mutex
 	var wg sync.WaitGroup
 	results := make([]ScreenerResult, 0, len(idxUniverse))
-
-	// Semaphore to cap concurrent Yahoo Finance requests
 	sem := make(chan struct{}, 4)
 
 	for _, ticker := range idxUniverse {
@@ -64,13 +63,13 @@ func screenTickers(minPrice, maxPrice float64, minVol int64, minRSI, maxRSI floa
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
-			hist, err := fetchYahooHistory(t, 60)
+			hist, err := yahoo.FetchYahooHistory(t, 60)
 			if err != nil || hist.CurrentPrice == 0 {
 				return
 			}
 
-			ta := computeTA(hist)
-			s := classifySignal(hist.CurrentPrice, ta)
+			ta := yahoo.ComputeTA(hist)
+			s := yahoo.ClassifySignal(hist.CurrentPrice, ta)
 
 			r := ScreenerResult{
 				Ticker:        hist.Symbol,
@@ -85,16 +84,7 @@ func screenTickers(minPrice, maxPrice float64, minVol int64, minRSI, maxRSI floa
 				Signal:        s,
 			}
 
-			if r.CurrentPrice < minPrice || r.CurrentPrice > maxPrice {
-				return
-			}
-			if r.Volume < minVol {
-				return
-			}
-			if r.RSI < minRSI || r.RSI > maxRSI {
-				return
-			}
-			if signal != "" && r.Signal != signal {
+			if r.CurrentPrice < minPrice || r.CurrentPrice > maxPrice || r.Volume < minVol || r.RSI < minRSI || r.RSI > maxRSI || (signal != "" && r.Signal != signal) {
 				return
 			}
 
@@ -108,55 +98,16 @@ func screenTickers(minPrice, maxPrice float64, minVol int64, minRSI, maxRSI floa
 	return results
 }
 
-func classifySignal(price float64, ta taResult) string {
-	bullish := 0
-	bearish := 0
-
-	if ta.RSI < 45 {
-		bullish++
-	} else if ta.RSI > 60 {
-		bearish++
-	}
-
-	if ta.MACD > ta.MACDSignal {
-		bullish++
-	} else {
-		bearish++
-	}
-
-	if ta.MA20 > 0 && price > ta.MA20 {
-		bullish++
-	} else if ta.MA20 > 0 {
-		bearish++
-	}
-
-	if bullish >= 2 {
-		return "bullish"
-	}
-	if bearish >= 2 {
-		return "bearish"
-	}
-	return "neutral"
-}
-
 func parseFloatQ(s string, def float64) float64 {
-	if s == "" {
-		return def
-	}
+	if s == "" { return def }
 	v, err := strconv.ParseFloat(s, 64)
-	if err != nil {
-		return def
-	}
+	if err != nil { return def }
 	return v
 }
 
 func parseInt64Q(s string, def int64) int64 {
-	if s == "" {
-		return def
-	}
+	if s == "" { return def }
 	v, err := strconv.ParseInt(s, 10, 64)
-	if err != nil {
-		return def
-	}
+	if err != nil { return def }
 	return v
 }

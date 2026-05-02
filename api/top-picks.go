@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+
+	"aura-trade/internal/yahoo"
 )
 
 type TopPick struct {
@@ -17,11 +19,7 @@ type TopPick struct {
 	Signal        string  `json:"signal"`
 }
 
-// topPicksTickers are the IDX blue-chip anchors shown in the top bar
-var topPicksTickers = []string{
-	"BBCA.JK", "BBRI.JK", "BMRI.JK", "TLKM.JK", "ASII.JK",
-	"BREN.JK", "GOTO.JK",
-}
+var topPicksTickers = []string{"BBCA.JK", "BBRI.JK", "BMRI.JK", "TLKM.JK", "ASII.JK", "BREN.JK", "GOTO.JK"}
 
 var (
 	topPicksCache     []TopPick
@@ -30,7 +28,7 @@ var (
 	topPicksCacheTTL  = 5 * time.Minute
 )
 
-func TopPicksHandler(w http.ResponseWriter, r *http.Request) {
+func Handler(w http.ResponseWriter, r *http.Request) {
 	topPicksCacheMu.RLock()
 	cached := topPicksCache
 	cacheAge := time.Since(topPicksCacheTime)
@@ -43,7 +41,6 @@ func TopPicksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	picks := fetchTopPicks()
-
 	topPicksCacheMu.Lock()
 	topPicksCache = picks
 	topPicksCacheTime = time.Now()
@@ -66,12 +63,12 @@ func fetchTopPicks() []TopPick {
 			sem <- struct{}{}
 			defer func() { <-sem }()
 
-			hist, err := fetchYahooHistory(t, 30)
+			hist, err := yahoo.FetchYahooHistory(t, 30)
 			if err != nil {
 				log.Printf("[top-picks] fetch failed %s: %v", t, err)
 				return
 			}
-			ta := computeTA(hist)
+			ta := yahoo.ComputeTA(hist)
 			mu.Lock()
 			picks = append(picks, TopPick{
 				Ticker:        hist.Symbol,
@@ -79,7 +76,7 @@ func fetchTopPicks() []TopPick {
 				PercentChange: hist.ChangePercent,
 				Volume:        hist.Volume,
 				RSI:           ta.RSI,
-				Signal:        classifySignal(hist.CurrentPrice, ta),
+				Signal:        yahoo.ClassifySignal(hist.CurrentPrice, ta),
 			})
 			mu.Unlock()
 		}(ticker)

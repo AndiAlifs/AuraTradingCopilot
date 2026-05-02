@@ -1,4 +1,4 @@
-package api
+package yahoo
 
 import (
 	"encoding/json"
@@ -23,9 +23,9 @@ type YahooHistoryData struct {
 	Volumes       []int64
 }
 
-// fetchYahooQuote returns a 5-day quote suitable for Gemini tool responses.
-func fetchYahooQuote(ticker string) (map[string]interface{}, error) {
-	data, err := fetchYahooHistory(ticker, 5)
+// FetchYahooQuote returns a 5-day quote suitable for Gemini tool responses.
+func FetchYahooQuote(ticker string) (map[string]interface{}, error) {
+	data, err := FetchYahooHistory(ticker, 5)
 	if err != nil {
 		return nil, err
 	}
@@ -41,8 +41,8 @@ func fetchYahooQuote(ticker string) (map[string]interface{}, error) {
 	}, nil
 }
 
-// fetchYahooHistory fetches OHLCV data for the given ticker over the specified day range.
-func fetchYahooHistory(ticker string, days int) (*YahooHistoryData, error) {
+// FetchYahooHistory fetches OHLCV data for the given ticker over the specified day range.
+func FetchYahooHistory(ticker string, days int) (*YahooHistoryData, error) {
 	rangeParam := fmt.Sprintf("%dd", days)
 	if days > 60 {
 		rangeParam = "3mo"

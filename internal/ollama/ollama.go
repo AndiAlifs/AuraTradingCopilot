@@ -1,4 +1,4 @@
-package api
+package ollama
 
 import (
 	"bytes"
@@ -8,18 +8,17 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	"aura-trade/internal/models"
 )
 
 // ollamaBaseURL is the Ollama local server address.
-// Override with the OLLAMA_BASE_URL environment variable if needed.
 func ollamaBaseURL() string {
 	if u := os.Getenv("OLLAMA_BASE_URL"); u != "" {
 		return u
 	}
 	return "http://localhost:11434"
 }
-
-// ── Ollama wire types (https://docs.ollama.com/api/introduction) ──────────────
 
 type ollamaMessage struct {
 	Role    string `json:"role"`
@@ -38,25 +37,19 @@ type ollamaChatResponse struct {
 	Error   string        `json:"error,omitempty"`
 }
 
-// callOllamaChat sends a chat turn to a locally-running Ollama model.
-// Because Ollama models generally don't support structured function-calling,
-// this path is a single-shot request: system prompt + history + user message
-// → assistant text response only (no tool execution).
-func callOllamaChat(model, systemPrompt string, contents []gContent) (string, error) {
+// CallOllamaChat sends a chat turn to a locally-running Ollama model.
+func CallOllamaChat(model, systemPrompt string, contents []models.GContent) (string, error) {
 	messages := make([]ollamaMessage, 0, len(contents)+1)
 
-	// Prepend system prompt
 	if systemPrompt != "" {
 		messages = append(messages, ollamaMessage{Role: "system", Content: systemPrompt})
 	}
 
-	// Convert Gemini-style gContent history to Ollama messages
 	for _, c := range contents {
 		role := c.Role
 		if role == "model" {
 			role = "assistant"
 		}
-		// Collapse all text parts into one message string
 		text := ""
 		for _, p := range c.Parts {
 			if p.Text != "" {
@@ -96,11 +89,9 @@ func callOllamaChat(model, systemPrompt string, contents []gContent) (string, er
 
 	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
-		log.Printf("[ollama/chat] ✗ network error: %v", err)
-		return "", fmt.Errorf("failed to reach Ollama at %s — is it running? (%v)", ollamaBaseURL(), err)
+		return "", fmt.Errorf("failed to reach Ollama: %v", err)
 	}
 	defer resp.Body.Close()
-	log.Printf("[ollama/chat] ← %d", resp.StatusCode)
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -109,14 +100,11 @@ func callOllamaChat(model, systemPrompt string, contents []gContent) (string, er
 
 	var ollamaResp ollamaChatResponse
 	if err := json.Unmarshal(respBody, &ollamaResp); err != nil {
-		log.Printf("[ollama/chat] ✗ parse error, raw body: %s", string(respBody))
-		return "", fmt.Errorf("failed to parse Ollama response: %s", string(respBody))
+		return "", fmt.Errorf("failed to parse Ollama response")
 	}
 	if ollamaResp.Error != "" {
-		log.Printf("[ollama/chat] ✗ API error: %s", ollamaResp.Error)
 		return "", fmt.Errorf("Ollama error: %s", ollamaResp.Error)
 	}
 
-	log.Printf("[ollama/chat] done, content length=%d", len(ollamaResp.Message.Content))
 	return ollamaResp.Message.Content, nil
 }

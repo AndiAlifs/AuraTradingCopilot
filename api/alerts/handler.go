@@ -1,20 +1,18 @@
-package api
+package alerts
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"aura-trade/internal/db"
-	"aura-trade/internal/yahoo"
 )
 
 type Alert struct {
 	ID          int     `json:"id"`
 	Ticker      string  `json:"ticker"`
-	Condition   string  `json:"condition"` // "above" or "below"
+	Condition   string  `json:"condition"`
 	TargetPrice float64 `json:"targetPrice"`
 	IsActive    bool    `json:"isActive"`
 	CreatedAt   string  `json:"createdAt"`
@@ -82,23 +80,12 @@ func createAlert(w http.ResponseWriter, r *http.Request, email string) {
 	if !strings.HasSuffix(ticker, ".JK") {
 		ticker += ".JK"
 	}
-	if req.Condition != "above" && req.Condition != "below" {
-		http.Error(w, "condition must be 'above' or 'below'", http.StatusBadRequest)
-		return
-	}
-	if req.TargetPrice <= 0 {
-		http.Error(w, "target price must be positive", http.StatusBadRequest)
-		return
-	}
 
 	database := db.GetDB()
 	var userID int64
-	if err := database.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&userID); err != nil {
-		http.Error(w, "user not found", http.StatusNotFound)
-		return
-	}
+	database.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&userID)
 
-	result, err := database.Exec(
+	_, err := database.Exec(
 		"INSERT INTO user_alerts (user_id, ticker, `condition`, target_price) VALUES (?, ?, ?, ?)",
 		userID, ticker, req.Condition, req.TargetPrice,
 	)
@@ -107,88 +94,19 @@ func createAlert(w http.ResponseWriter, r *http.Request, email string) {
 		return
 	}
 
-	alertID, _ := result.LastInsertId()
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":      alertID,
-		"message": "alert created",
-	})
+	json.NewEncoder(w).Encode(map[string]string{"message": "alert created"})
 }
 
 func deleteAlert(w http.ResponseWriter, r *http.Request, email string) {
 	idStr := r.URL.Query().Get("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
-		http.Error(w, "invalid alert id", http.StatusBadRequest)
-		return
-	}
+	id, _ := strconv.Atoi(idStr)
 
 	database := db.GetDB()
-	res, err := database.Exec(`
+	database.Exec(`
 		UPDATE user_alerts SET is_active = 0
 		WHERE id = ? AND user_id = (SELECT id FROM users WHERE email = ?)
 	`, id, email)
-	if err != nil {
-		http.Error(w, "failed to delete alert", http.StatusInternalServerError)
-		return
-	}
-	rows, _ := res.RowsAffected()
-	if rows == 0 {
-		http.Error(w, "alert not found", http.StatusNotFound)
-		return
-	}
 
 	w.WriteHeader(http.StatusNoContent)
-}
-
-func CheckAlerts() {
-	database := db.GetDB()
-	rows, err := database.Query(`
-		SELECT ua.id, ua.ticker, ua.` + "`condition`" + `, ua.target_price, u.email
-		FROM user_alerts ua
-		JOIN users u ON ua.user_id = u.id
-		WHERE ua.is_active = 1
-	`)
-	if err != nil {
-		log.Printf("[alerts] error fetching active alerts: %v", err)
-		return
-	}
-	defer rows.Close()
-
-	type check struct {
-		id          int
-		ticker      string
-		condition   string
-		targetPrice float64
-		email       string
-	}
-
-	var checks []check
-	for rows.Next() {
-		var c check
-		if err := rows.Scan(&c.id, &c.ticker, &c.condition, &c.targetPrice, &c.email); err != nil {
-			continue
-		}
-		checks = append(checks, c)
-	}
-	rows.Close()
-
-	for _, c := range checks {
-		quote, err := yahoo.FetchYahooQuote(c.ticker)
-		if err != nil {
-			log.Printf("[alerts] quote fetch failed %s: %v", c.ticker, err)
-			continue
-		}
-		current, _ := quote["currentPrice"].(float64)
-
-		triggered := (c.condition == "above" && current >= c.targetPrice) ||
-			(c.condition == "below" && current <= c.targetPrice)
-
-		if triggered {
-			log.Printf("[alerts] TRIGGERED %s %s %.2f (now %.2f) → %s",
-				c.ticker, c.condition, c.targetPrice, current, c.email)
-			database.Exec("UPDATE user_alerts SET is_active = 0 WHERE id = ?", c.id)
-		}
-	}
 }
