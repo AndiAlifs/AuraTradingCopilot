@@ -17,6 +17,7 @@ import (
 type ChatRequest struct {
 	History []ConversationTurn `json:"history"`
 	Message string             `json:"message"`
+	Model   string             `json:"model"` // e.g. "gemini-2.5-pro" or "kimi-k2.6"
 }
 
 type ConversationTurn struct {
@@ -195,7 +196,12 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		Parts: []gPart{{Text: req.Message}},
 	})
 
-	text, strategy, err := runAuraAgent(apiKey, systemPrompt, contents)
+	model := req.Model
+	if model == "" {
+		model = DefaultModel
+	}
+
+	text, strategy, err := runAuraAgent(apiKey, model, systemPrompt, contents)
 	if err != nil {
 		log.Printf("[chat] ERROR from agent: %v", err)
 		http.Error(w, "agent error: "+err.Error(), http.StatusInternalServerError)
@@ -208,11 +214,21 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 // ── Agent loop ────────────────────────────────────────────────────────────────
 
-func runAuraAgent(apiKey string, systemPrompt string, contents []gContent) (string, *StrategyCardData, error) {
+func runAuraAgent(apiKey, model, systemPrompt string, contents []gContent) (string, *StrategyCardData, error) {
+	// ── Ollama path: single-shot, no function calling ─────────────────────────
+	if providerOf(model) == "ollama" {
+		text, err := callOllamaChat(model, systemPrompt, contents)
+		if err != nil {
+			return "", nil, err
+		}
+		return text, nil, nil
+	}
+
+	// ── Gemini path: agentic loop with function calling ───────────────────────
 	var strategy *StrategyCardData
 
 	for i := 0; i < 8; i++ {
-		resp, err := callGeminiChat(apiKey, systemPrompt, contents)
+		resp, err := callGeminiChat(apiKey, model, systemPrompt, contents)
 		if err != nil {
 			return "", nil, err
 		}
@@ -334,10 +350,10 @@ func argFloat(args map[string]interface{}, key string) float64 {
 
 // ── Gemini API call ───────────────────────────────────────────────────────────
 
-func callGeminiChat(apiKey string, systemPrompt string, contents []gContent) (*gAPIResponse, error) {
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=%s", apiKey)
+func callGeminiChat(apiKey, model, systemPrompt string, contents []gContent) (*gAPIResponse, error) {
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", model, apiKey)
 
-	log.Printf("[gemini/chat] → POST model=gemini-3.1-pro-preview turns=%d", len(contents))
+	log.Printf("[gemini/chat] → POST model=%s turns=%d", model, len(contents))
 	if len(contents) > 0 {
 		last := contents[len(contents)-1]
 		if len(last.Parts) > 0 {

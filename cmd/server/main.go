@@ -36,6 +36,7 @@ func main() {
 	mux.HandleFunc("/api/login", cors(api.LoginHandler))
 	mux.HandleFunc("/api/top-picks", cors(api.TopPicksHandler))
 	mux.HandleFunc("/api/screener", cors(api.ScreenerHandler))
+	mux.HandleFunc("/api/models", cors(api.ModelsHandler))
 
 	// Protected routes (require JWT)
 	mux.HandleFunc("/api/chat", cors(api.RequireAuth(api.ChatHandler)))

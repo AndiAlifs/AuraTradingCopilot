@@ -1,6 +1,12 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import { Observable, BehaviorSubject } from 'rxjs';
+
+export interface ModelInfo {
+  id: string;
+  name: string;
+  provider: 'google' | 'ollama';
+}
 
 export interface StrategyCardData {
   ticker: string;
@@ -82,18 +88,29 @@ export class TradeService {
   private _chatInputFocus = new BehaviorSubject<string | null>(null);
   chatInputFocus$ = this._chatInputFocus.asObservable();
 
+  /** Currently selected AI model ID. Defaults to gemini-2.5-pro. */
+  private _selectedModel = new BehaviorSubject<string>('gemini-2.5-pro');
+  selectedModel$ = this._selectedModel.asObservable();
+
+  get selectedModel(): string { return this._selectedModel.getValue(); }
+  setModel(id: string) { this._selectedModel.next(id); }
+
   constructor(private http: HttpClient) {}
+
+  getModels(): Observable<ModelInfo[]> {
+    return this.http.get<ModelInfo[]>('/api/models');
+  }
 
   getTopPicks(): Observable<TopPick[]> {
     return this.http.get<TopPick[]>('/api/top-picks');
   }
 
   chat(history: ConversationTurn[], message: string): Observable<ChatResponse> {
-    return this.http.post<ChatResponse>('/api/chat', { history, message });
+    return this.http.post<ChatResponse>('/api/chat', { history, message, model: this.selectedModel });
   }
 
   analyze(ticker: string): Observable<StrategyCardData> {
-    return this.http.post<StrategyCardData>('/api/analyze', { ticker });
+    return this.http.post<StrategyCardData>('/api/analyze', { ticker, model: this.selectedModel });
   }
 
   screen(filters: ScreenerFilters): Observable<ScreenerResult[]> {

@@ -36,6 +36,7 @@ type StrategyCardData struct {
 
 type AnalyzeRequest struct {
 	Ticker string `json:"ticker"`
+	Model  string `json:"model"` // optional; defaults to DefaultModel
 }
 
 func detectTradingEmotion(userMessage string) string {
@@ -87,8 +88,13 @@ func AnalyzeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	model := req.Model
+	if model == "" {
+		model = DefaultModel
+	}
+
 	ta := computeTA(hist)
-	strategy, err := analyzeWithGemini(apiKey, ticker, hist, ta)
+	strategy, err := analyzeWithGemini(apiKey, model, ticker, hist, ta)
 	if err != nil {
 		http.Error(w, "gemini error: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -211,7 +217,7 @@ func calcATR(highs, lows, closes []float64, period int) float64 {
 
 // ── Gemini Analysis ───────────────────────────────────────────────────────────
 
-func analyzeWithGemini(apiKey, ticker string, hist *YahooHistoryData, ta taResult) (*StrategyCardData, error) {
+func analyzeWithGemini(apiKey, model, ticker string, hist *YahooHistoryData, ta taResult) (*StrategyCardData, error) {
 	price := hist.CurrentPrice
 
 	// ATR-based stop loss: 1.5× ATR below current price
@@ -267,11 +273,43 @@ Respond ONLY with valid JSON, no markdown:
   "rationale": "string (2 punchy sentences: setup thesis + catalyst)"
 }`, ticker, string(taJSON))
 
+	// Route Ollama models through the chat adapter (plain text, then skip JSON parsing)
+	if providerOf(model) == "ollama" {
+		contents := []gContent{{
+			Role:  "user",
+			Parts: []gPart{{Text: prompt}},
+		}}
+		rawText, err := callOllamaChat(model, "", contents)
+		if err != nil {
+			return nil, err
+		}
+		// Attempt to parse JSON from the response
+		clean := strings.TrimPrefix(strings.TrimSpace(rawText), "```json")
+		clean = strings.TrimPrefix(clean, "```")
+		clean = strings.TrimSuffix(strings.TrimSpace(clean), "```")
+		var strategy StrategyCardData
+		if err := json.Unmarshal([]byte(strings.TrimSpace(clean)), &strategy); err != nil {
+			log.Printf("[ollama/analyze] ✗ strategy parse error: %v | raw: %s", err, rawText)
+			return nil, fmt.Errorf("failed to parse strategy JSON from Ollama: %v", err)
+		}
+		strategy.RSI = ta.RSI
+		strategy.MACD = ta.MACD
+		strategy.MACDSignal = ta.MACDSignal
+		strategy.MACDHistogram = ta.MACDHistogram
+		strategy.MA20 = ta.MA20
+		strategy.MA50 = ta.MA50
+		strategy.ATR = ta.ATR
+		strategy.StopLossJustification = stopJustification
+		strategy.TakeProfitJustification = tpJustification
+		return &strategy, nil
+	}
+
 	url := fmt.Sprintf(
-		"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s",
+		"https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s",
+		model,
 		apiKey,
 	)
-	log.Printf("[gemini/analyze] → POST ticker=%s rsi=%.1f macd=%.2f ma20=%.0f", ticker, ta.RSI, ta.MACD, ta.MA20)
+	log.Printf("[gemini/analyze] → POST ticker=%s model=%s rsi=%.1f macd=%.2f ma20=%.0f", ticker, model, ta.RSI, ta.MACD, ta.MA20)
 
 	body, _ := json.Marshal(map[string]interface{}{
 		"contents": []map[string]interface{}{
