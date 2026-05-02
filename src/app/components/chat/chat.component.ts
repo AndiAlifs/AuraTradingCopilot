@@ -186,10 +186,9 @@ export class ChatComponent implements OnInit, AfterViewChecked {
           { id: 'gemini-3.1-pro-preview',        name: 'Gemini 3.1 Pro',        provider: 'google' },
           { id: 'gemini-3-flash-preview',        name: 'Gemini 3 Flash',        provider: 'google' },
           { id: 'gemini-3.1-flash-lite-preview', name: 'Gemini 3.1 Flash Lite', provider: 'google' },
-          { id: 'kimi-k2.6',                     name: 'Kimi K2.6',             provider: 'ollama' },
-          { id: 'deepseek-v4-pro',               name: 'DeepSeek V4 Pro',       provider: 'ollama' },
-          { id: 'gemma4',                        name: 'Gemma 4',               provider: 'ollama' },
-          { id: 'glm-5.1',                       name: 'GLM 5.1',               provider: 'ollama' },
+          { id: 'gpt-oss:20b-cloud',             name: 'GPT-OSS 20B Cloud',     provider: 'ollama' },
+          { id: 'glm-4.7:cloud',                 name: 'GLM-4.7 Cloud',         provider: 'ollama' },
+          { id: 'minimax-m2.1:cloud',            name: 'MiniMax M2.1 Cloud',    provider: 'ollama' },
         ];
       }
     });

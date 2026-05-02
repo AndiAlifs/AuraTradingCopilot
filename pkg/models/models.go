@@ -17,11 +17,10 @@ var AvailableModels = []ModelInfo{
 	{ID: "gemini-3-flash-preview", Name: "Gemini 3 Flash", Provider: "google"},
 	{ID: "gemini-3.1-flash-lite-preview", Name: "Gemini 3.1 Flash Lite", Provider: "google"},
 
-	// ── Ollama (local) ───────────────────────────────────────────────────────
-	{ID: "kimi-k2.6", Name: "Kimi K2.6", Provider: "ollama"},
-	{ID: "deepseek-v4-pro", Name: "DeepSeek V4 Pro", Provider: "ollama"},
-	{ID: "gemma4", Name: "Gemma 4", Provider: "ollama"},
-	{ID: "glm-5.1", Name: "GLM 5.1", Provider: "ollama"},
+	// ── Ollama (cloud) ───────────────────────────────────────────────────────
+	{ID: "gpt-oss:20b-cloud", Name: "GPT-OSS 20B Cloud", Provider: "ollama"},
+	{ID: "glm-4.7:cloud",     Name: "GLM-4.7 Cloud",     Provider: "ollama"},
+	{ID: "minimax-m2.1:cloud", Name: "MiniMax M2.1 Cloud", Provider: "ollama"},
 }
 
 // DefaultModel is the model used when none is specified by the client.

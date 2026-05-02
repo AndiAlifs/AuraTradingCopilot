@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"aura-trade/pkg/auth"
 	"aura-trade/pkg/db"
 	"aura-trade/pkg/logger"
 	"aura-trade/pkg/models"
@@ -37,64 +38,70 @@ const auraSystemPrompt = `You are Aura, an AI quantitative analyst for IDX swing
 Tools: get_stock_quote, generate_trade_setup.`
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
 
-	start := time.Now()
+		start := time.Now()
 
-	apiKey := os.Getenv("GEMINI_API_KEY")
-	var req ChatRequest
-	json.NewDecoder(r.Body).Decode(&req)
+		apiKey := os.Getenv("GEMINI_API_KEY")
+		var req ChatRequest
+		json.NewDecoder(r.Body).Decode(&req)
 
-	email := r.Header.Get("X-User-Email")
-	var currentUser db.User
-	var rt, ps, el sql.NullString
-	database := db.GetDB()
-	database.QueryRow("SELECT id, email, risk_tolerance, preferred_strategy, experience_level FROM users WHERE email = ?", email).
-		Scan(&currentUser.ID, &currentUser.Email, &rt, &ps, &el)
+		email := r.Header.Get("X-User-Email")
+		var currentUser db.User
+		var rt, ps, el sql.NullString
+		database := db.GetDB()
+		database.QueryRow("SELECT id, email, risk_tolerance, preferred_strategy, experience_level FROM users WHERE email = ?", email).
+			Scan(&currentUser.ID, &currentUser.Email, &rt, &ps, &el)
 
-	model := req.Model
-	if model == "" { model = models.DefaultModel }
+		model := req.Model
+		if model == "" {
+			model = models.DefaultModel
+		}
 
-	// Log incoming request
-	logger.Info("chat", logger.LogEntry{
-		User:    email,
-		Model:   model,
-		Message: logger.Snippet(req.Message, 200),
-	})
-
-	contents := make([]models.GContent, 0, len(req.History)+1)
-	for _, turn := range req.History {
-		role := "user"
-		if turn.Role == "aura" { role = "model" }
-		contents = append(contents, models.GContent{Role: role, Parts: []models.GPart{{Text: turn.Text}}})
-	}
-	contents = append(contents, models.GContent{Role: "user", Parts: []models.GPart{{Text: req.Message}}})
-
-	text, strategy, err := runAuraAgent(apiKey, model, auraSystemPrompt, contents)
-	if err != nil {
-		logger.Error("chat", logger.LogEntry{
-			User:       email,
-			Model:      model,
-			Error:      err.Error(),
-			DurationMs: time.Since(start).Milliseconds(),
+		// Log incoming request
+		logger.Info("chat", logger.LogEntry{
+			User:    email,
+			Model:   model,
+			Message: logger.Snippet(req.Message, 200),
 		})
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
-	// Log successful response
-	logger.Info("chat", logger.LogEntry{
-		User:            email,
-		Model:           model,
-		ResponseSnippet: logger.Snippet(text, 200),
-		DurationMs:      time.Since(start).Milliseconds(),
-	})
+		contents := make([]models.GContent, 0, len(req.History)+1)
+		for _, turn := range req.History {
+			role := "user"
+			if turn.Role == "aura" {
+				role = "model"
+			}
+			contents = append(contents, models.GContent{Role: role, Parts: []models.GPart{{Text: turn.Text}}})
+		}
+		contents = append(contents, models.GContent{Role: "user", Parts: []models.GPart{{Text: req.Message}}})
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(ChatResponse{Text: text, Strategy: strategy})
+		text, strategy, err := runAuraAgent(apiKey, model, auraSystemPrompt, contents)
+		if err != nil {
+			logger.Error("chat", logger.LogEntry{
+				User:       email,
+				Model:      model,
+				Error:      err.Error(),
+				DurationMs: time.Since(start).Milliseconds(),
+			})
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		// Log successful response
+		logger.Info("chat", logger.LogEntry{
+			User:            email,
+			Model:           model,
+			ResponseSnippet: logger.Snippet(text, 200),
+			DurationMs:      time.Since(start).Milliseconds(),
+		})
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(ChatResponse{Text: text, Strategy: strategy})
+	}).ServeHTTP(w, r)
 }
 
 func runAuraAgent(apiKey, model, systemPrompt string, contents []models.GContent) (string, *models.StrategyCardData, error) {
@@ -169,6 +176,39 @@ func callGeminiChat(apiKey, model, systemPrompt string, contents []models.GConte
 	payload := map[string]interface{}{
 		"system_instruction": map[string]interface{}{"parts": []map[string]interface{}{{"text": systemPrompt}}},
 		"contents": contents,
+		"tools": []map[string]interface{}{
+			{
+				"function_declarations": []map[string]interface{}{
+					{
+						"name": "get_stock_quote",
+						"description": "Get the current stock quote for a given ticker",
+						"parameters": map[string]interface{}{
+							"type": "OBJECT",
+							"properties": map[string]interface{}{
+								"ticker": map[string]interface{}{"type": "STRING"},
+							},
+							"required": []string{"ticker"},
+						},
+					},
+					{
+						"name": "generate_trade_setup",
+						"description": "Generate a trade setup and render it as a strategy card",
+						"parameters": map[string]interface{}{
+							"type": "OBJECT",
+							"properties": map[string]interface{}{
+								"ticker": map[string]interface{}{"type": "STRING"},
+								"confidence": map[string]interface{}{"type": "INTEGER"},
+								"entry": map[string]interface{}{"type": "NUMBER"},
+								"takeProfit": map[string]interface{}{"type": "NUMBER"},
+								"stopLoss": map[string]interface{}{"type": "NUMBER"},
+								"rationale": map[string]interface{}{"type": "STRING"},
+							},
+							"required": []string{"ticker", "confidence", "entry", "takeProfit", "stopLoss", "rationale"},
+						},
+					},
+				},
+			},
+		},
 	}
 	body, _ := json.Marshal(payload)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))

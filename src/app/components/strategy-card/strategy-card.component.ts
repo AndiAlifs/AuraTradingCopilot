@@ -223,15 +223,20 @@ type Tab = 'trade' | 'ta' | 'risk';
 
         <!-- Set Alert button -->
         <div class="px-5 pb-5">
-          <button (click)="setAlert()"
+          <button (click)="setAlert()" [disabled]="isSettingAlert"
             class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600
                    hover:border-auraGreen text-white rounded-lg font-semibold text-sm transition-all
-                   focus:outline-none focus:ring-2 focus:ring-auraGreen/40 flex justify-center items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-auraGreen" viewBox="0 0 20 20" fill="currentColor">
+                   focus:outline-none focus:ring-2 focus:ring-auraGreen/40 flex justify-center items-center gap-2
+                   disabled:opacity-50 disabled:cursor-not-allowed">
+            <svg *ngIf="!isSettingAlert" xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-auraGreen" viewBox="0 0 20 20" fill="currentColor">
               <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
             </svg>
-            Set Price Alert
+            <div *ngIf="isSettingAlert" class="h-4 w-4 border-2 border-auraGreen border-t-transparent rounded-full animate-spin"></div>
+            {{ isSettingAlert ? 'Setting Alert...' : 'Set Price Alert' }}
           </button>
+          <div *ngIf="alertError" class="mt-2 text-xs text-auraRed text-center">
+            {{ alertError }}
+          </div>
         </div>
 
         <!-- Toast -->
@@ -248,6 +253,8 @@ export class StrategyCardComponent implements OnInit {
 
   activeTab: Tab = 'trade';
   showToast = false;
+  isSettingAlert = false;
+  alertError = '';
 
   tabs = [
     { key: 'trade' as Tab, label: 'Trade Setup' },
@@ -288,14 +295,30 @@ export class StrategyCardComponent implements OnInit {
   }
 
   setAlert() {
-    if (this.auth.isLoggedIn) {
-      this.trade.createAlert({
-        ticker: this.data.ticker,
-        condition: 'above',
-        targetPrice: this.data.takeProfit
-      }).subscribe();
+    if (!this.auth.isLoggedIn) {
+      this.alertError = 'Please sign in to set alerts';
+      setTimeout(() => this.alertError = '', 3000);
+      return;
     }
-    this.showToast = true;
-    setTimeout(() => this.showToast = false, 3000);
+
+    this.isSettingAlert = true;
+    this.alertError = '';
+
+    this.trade.createAlert({
+      ticker: this.data.ticker,
+      condition: 'above',
+      targetPrice: this.data.takeProfit
+    }).subscribe({
+      next: () => {
+        this.isSettingAlert = false;
+        this.showToast = true;
+        setTimeout(() => this.showToast = false, 3000);
+      },
+      error: (err) => {
+        this.isSettingAlert = false;
+        this.alertError = 'Failed to set alert. Try again.';
+        console.error('Alert error:', err);
+      }
+    });
   }
 }

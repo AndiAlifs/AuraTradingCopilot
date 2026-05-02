@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 
+	"aura-trade/pkg/auth"
 	"aura-trade/pkg/db"
 )
 
@@ -25,18 +26,20 @@ type CreateAlertRequest struct {
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
-	email := r.Header.Get("X-User-Email")
+	auth.RequireAuth(func(w http.ResponseWriter, r *http.Request) {
+		email := r.Header.Get("X-User-Email")
 
-	switch r.Method {
-	case http.MethodGet:
-		getAlerts(w, r, email)
-	case http.MethodPost:
-		createAlert(w, r, email)
-	case http.MethodDelete:
-		deleteAlert(w, r, email)
-	default:
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-	}
+		switch r.Method {
+		case http.MethodGet:
+			getAlerts(w, r, email)
+		case http.MethodPost:
+			createAlert(w, r, email)
+		case http.MethodDelete:
+			deleteAlert(w, r, email)
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}).ServeHTTP(w, r)
 }
 
 func getAlerts(w http.ResponseWriter, _ *http.Request, email string) {
