@@ -17,9 +17,17 @@ export interface TopPick {
   percentChange: number;
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+export interface ConversationTurn {
+  role: 'user' | 'aura';
+  text: string;
+}
+
+export interface ChatResponse {
+  text: string;
+  strategy?: StrategyCardData;
+}
+
+@Injectable({ providedIn: 'root' })
 export class TradeService {
   private _chatInputFocus = new Subject<string>();
   chatInputFocus$ = this._chatInputFocus.asObservable();
@@ -30,8 +38,8 @@ export class TradeService {
     return this.http.get<TopPick[]>('/api/top-picks');
   }
 
-  analyzeTicker(ticker: string): Observable<StrategyCardData> {
-    return this.http.post<StrategyCardData>('/api/analyze', { ticker });
+  chat(history: ConversationTurn[], message: string): Observable<ChatResponse> {
+    return this.http.post<ChatResponse>('/api/chat', { history, message });
   }
 
   triggerChatWithTicker(ticker: string) {
