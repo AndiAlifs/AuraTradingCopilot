@@ -27,7 +27,7 @@ interface ChatMessage {
                class="w-32 h-32 rounded-full mx-auto mb-4 border-2 border-slate-700 shadow-lg object-cover"
                onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\\'http://www.w3.org/2000/svg\\\' width=\\\'128\\\' height=\\\'128\\\'><rect width=\\\'128\\\' height=\\\'128\\\' fill=\\\'%231e293b\\\'/><text x=\\\'64\\\' y=\\\'80\\\' font-size=\\\'48\\\' font-family=\\\'sans-serif\\\' text-anchor=\\\'middle\\\' fill=\\\'%234ade80\\\'>A</text></svg>'">
           <h2 class="text-2xl font-light text-slate-300 tracking-wide">Hi, I'm <span class="font-bold text-auraGreen">Aura</span>.</h2>
-          <p class="text-slate-500 mt-2">Your Quantitative Analyst for IDX Swing Trading.</p>
+          <p class="text-slate-500 mt-2">Your personal trading assistant. Ask me anything about the market.</p>
         </div>
 
         <div *ngFor="let msg of messages"
