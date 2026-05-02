@@ -87,7 +87,7 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   ngOnInit() {
     this.tradeService.chatInputFocus$.subscribe(ticker => {
-      this.inputMessage = \`Give me the setup for \${ticker}\`;
+      this.inputMessage = `Give me the setup for ${ticker}`;
       this.chatInput.nativeElement.focus();
     });
   }
@@ -131,13 +131,13 @@ export class ChatComponent implements OnInit, AfterViewChecked {
         this.messages = this.messages.filter(m => !m.isAnalyzing);
         this.isAnalyzing = false;
         
-        this.messages.push({ role: 'aura', text: \`Here is the quantitative setup for \${data.ticker}:\` });
+        this.messages.push({ role: 'aura', text: `Here is the quantitative setup for ${data.ticker}:` });
         this.messages.push({ role: 'aura', strategy: data });
       },
       error: (err) => {
         this.messages = this.messages.filter(m => !m.isAnalyzing);
         this.isAnalyzing = false;
-        this.messages.push({ role: 'aura', text: \`Error analyzing \${ticker}: \${err.message || 'Server error'}\` });
+        this.messages.push({ role: 'aura', text: `Error analyzing ${ticker}: ${err.message || 'Server error'}` });
       }
     });
   }
