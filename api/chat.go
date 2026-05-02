@@ -37,6 +37,7 @@ type gContent struct {
 
 type gPart struct {
 	Text             string     `json:"text,omitempty"`
+	ThoughtSignature string     `json:"thoughtSignature,omitempty"`
 	FunctionCall     *gFuncCall `json:"functionCall,omitempty"`
 	FunctionResponse *gFuncResp `json:"functionResponse,omitempty"`
 }
@@ -369,7 +370,7 @@ func fetchYahooQuote(ticker string) (map[string]interface{}, error) {
 // ── Gemini API call ───────────────────────────────────────────────────────────
 
 func callGeminiChat(apiKey string, contents []gContent) (*gAPIResponse, error) {
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=%s", apiKey)
+	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=%s", apiKey)
 
 	payload := map[string]interface{}{
 		"system_instruction": map[string]interface{}{
