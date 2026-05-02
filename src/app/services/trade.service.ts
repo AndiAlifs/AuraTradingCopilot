@@ -88,12 +88,19 @@ export class TradeService {
   private _chatInputFocus = new BehaviorSubject<string | null>(null);
   chatInputFocus$ = this._chatInputFocus.asObservable();
 
+  private _alertsChanged = new BehaviorSubject<void>(undefined);
+  alertsChanged$ = this._alertsChanged.asObservable();
+
   /** Currently selected AI model ID. Defaults to gemini-2.5-pro. */
   private _selectedModel = new BehaviorSubject<string>('gemini-2.5-pro');
   selectedModel$ = this._selectedModel.asObservable();
 
   get selectedModel(): string { return this._selectedModel.getValue(); }
   setModel(id: string) { this._selectedModel.next(id); }
+
+  notifyAlertsChanged() {
+    this._alertsChanged.next();
+  }
 
   constructor(private http: HttpClient) {}
 

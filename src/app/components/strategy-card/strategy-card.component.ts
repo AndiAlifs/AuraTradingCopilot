@@ -312,6 +312,7 @@ export class StrategyCardComponent implements OnInit {
       next: () => {
         this.isSettingAlert = false;
         this.showToast = true;
+        this.trade.notifyAlertsChanged();
         setTimeout(() => this.showToast = false, 3000);
       },
       error: (err) => {

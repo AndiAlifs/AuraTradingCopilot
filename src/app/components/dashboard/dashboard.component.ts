@@ -169,6 +169,12 @@ export class DashboardComponent implements OnInit {
       error: () => this.loading = false
     });
 
+    this.trade.alertsChanged$.subscribe(() => {
+      this.loadAlerts();
+    });
+  }
+
+  loadAlerts() {
     this.loadingAlerts = true;
     this.trade.getAlerts().subscribe({
       next: (res) => {

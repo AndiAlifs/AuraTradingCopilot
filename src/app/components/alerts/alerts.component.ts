@@ -162,6 +162,7 @@ export class AlertsComponent implements OnInit {
         this.createSuccess = true;
         this.createLoading = false;
         this.form.reset({ condition: 'above' });
+        this.trade.notifyAlertsChanged();
         this.load();
         setTimeout(() => this.createSuccess = false, 3000);
       },
@@ -174,7 +175,10 @@ export class AlertsComponent implements OnInit {
 
   remove(id: number) {
     this.trade.deleteAlert(id).subscribe({
-      next: () => { this.alerts = this.alerts.filter(a => a.id !== id); },
+      next: () => {
+        this.alerts = this.alerts.filter(a => a.id !== id);
+        this.trade.notifyAlertsChanged();
+      },
       error: () => {}
     });
   }
