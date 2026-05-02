@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TradeService, StrategyCardData, ConversationTurn, ModelInfo } from '../../services/trade.service';
 import { StrategyCardComponent } from '../strategy-card/strategy-card.component';
+import { MarkdownPipe } from '../../pipes/markdown.pipe';
 
 interface ChatMessage {
   role: 'user' | 'aura';
@@ -14,7 +15,7 @@ interface ChatMessage {
 @Component({
   selector: 'app-chat',
   standalone: true,
-  imports: [CommonModule, FormsModule, StrategyCardComponent],
+  imports: [CommonModule, FormsModule, StrategyCardComponent, MarkdownPipe],
   host: {
     class: 'flex flex-col flex-1 overflow-hidden'
   },
@@ -93,8 +94,11 @@ interface ChatMessage {
                [class.bg-auraPanel]="msg.role === 'aura'"
                [class.text-slate-200]="msg.role === 'aura'"
                [class.border]="msg.role === 'aura'"
-               [class.border-slate-700]="msg.role === 'aura'">
-            {{msg.text}}
+               [class.border-slate-700]="msg.role === 'aura'"
+               [class.prose]="msg.role === 'aura'"
+               [class.prose-invert]="msg.role === 'aura'">
+            <ng-container *ngIf="msg.role === 'user'">{{msg.text}}</ng-container>
+            <div *ngIf="msg.role === 'aura'" class="markdown-body" [innerHTML]="msg.text | markdown"></div>
           </div>
 
           <div *ngIf="msg.isAnalyzing"
@@ -139,6 +143,15 @@ interface ChatMessage {
     .model-select-wrapper select option {
       background: #1e293b;
       color: #e2e8f0;
+    }
+    ::ng-deep .markdown-body p:last-child {
+      margin-bottom: 0;
+    }
+    ::ng-deep .markdown-body p:first-child {
+      margin-top: 0;
+    }
+    ::ng-deep .markdown-body strong {
+      color: #fff;
     }
   `]
 })

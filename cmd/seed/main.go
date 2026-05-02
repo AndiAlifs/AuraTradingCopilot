@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	api "aura-trade/api"
+	"aura-trade/internal/db"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,13 +16,13 @@ func main() {
 	loadDotEnv()
 
 	// Initialize DB
-	db := api.GetDB()
-	if db == nil {
+	database := db.GetDB()
+	if database == nil {
 		log.Fatal("failed to initialize database")
 	}
 
 	// Seed users
-	seedData(db)
+	seedData(database)
 	fmt.Println("Seeding complete!")
 }
 
