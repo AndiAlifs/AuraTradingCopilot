@@ -41,6 +41,10 @@ export class AuthService {
     );
   }
 
+  updateProfile(profileData: { riskTolerance: string; preferredStrategy: string }): Observable<any> {
+    return this.http.post('/api/profile', profileData);
+  }
+
   logout() {
     localStorage.removeItem(STORAGE_KEY);
     this.current.next(null);

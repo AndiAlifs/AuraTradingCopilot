@@ -1,0 +1,42 @@
+<div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+    <button (click)="onCancel()" class="absolute top-4 right-4 text-gray-500 hover:text-white transition-colors">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+    
+    <h2 class="text-2xl font-bold text-white mb-2">Configure AI Copilot</h2>
+    <p class="text-gray-400 text-sm mb-6">Tell Aura about your trading style so she can tailor her analysis to you.</p>
+    
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Risk Appetite</label>
+        <select formControlName="riskTolerance" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+          <option value="" disabled selected>Select your risk tolerance</option>
+          <option value="Conservative">Conservative (Capital Preservation)</option>
+          <option value="Moderate">Moderate (Balanced)</option>
+          <option value="Aggressive">Aggressive (High Growth)</option>
+        </select>
+      </div>
+      
+      <div>
+        <label class="block text-sm font-medium text-gray-300 mb-1">Primary Strategy</label>
+        <select formControlName="preferredStrategy" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all">
+          <option value="" disabled selected>Select your primary strategy</option>
+          <option value="Value Investing">Value Investing</option>
+          <option value="Swing Trading">Swing Trading</option>
+          <option value="BSJP">BSJP (Beli Sore Jual Pagi)</option>
+          <option value="Long-term">Long-term Holding</option>
+        </select>
+      </div>
+      
+      <div class="pt-4 flex justify-end gap-3">
+        <button type="button" (click)="onCancel()" class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-800 transition-colors">
+          Cancel
+        </button>
+        <button type="submit" [disabled]="profileForm.invalid || isSubmitting" class="px-5 py-2.5 rounded-lg text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-lg shadow-emerald-900/20">
+          {{ isSubmitting ? 'Saving...' : 'Save Profile' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

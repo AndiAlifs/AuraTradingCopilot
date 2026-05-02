@@ -41,6 +41,7 @@ func main() {
 	mux.HandleFunc("/api/chat", cors(api.RequireAuth(api.ChatHandler)))
 	mux.HandleFunc("/api/analyze", cors(api.RequireAuth(api.AnalyzeHandler)))
 	mux.HandleFunc("/api/alerts", cors(api.RequireAuth(api.AlertsHandler)))
+	mux.HandleFunc("/api/profile", cors(api.RequireAuth(api.UpdateProfileHandler)))
 
 	port := os.Getenv("PORT")
 	if port == "" {

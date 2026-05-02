@@ -42,7 +42,7 @@ func AlertsHandler(w http.ResponseWriter, r *http.Request) {
 func getAlerts(w http.ResponseWriter, _ *http.Request, email string) {
 	db := GetDB()
 	rows, err := db.Query(`
-		SELECT ua.id, ua.ticker, ua.condition, ua.target_price, ua.is_active, ua.created_at
+		SELECT ua.id, ua.ticker, ua.`+"`condition`"+`, ua.target_price, ua.is_active, ua.created_at
 		FROM user_alerts ua
 		JOIN users u ON ua.user_id = u.id
 		WHERE u.email = ? AND ua.is_active = 1
@@ -97,7 +97,7 @@ func createAlert(w http.ResponseWriter, r *http.Request, email string) {
 	}
 
 	result, err := db.Exec(
-		"INSERT INTO user_alerts (user_id, ticker, condition, target_price) VALUES (?, ?, ?, ?)",
+		"INSERT INTO user_alerts (user_id, ticker, `condition`, target_price) VALUES (?, ?, ?, ?)",
 		userID, ticker, req.Condition, req.TargetPrice,
 	)
 	if err != nil {
@@ -145,7 +145,7 @@ func deleteAlert(w http.ResponseWriter, r *http.Request, email string) {
 func CheckAlerts() {
 	db := GetDB()
 	rows, err := db.Query(`
-		SELECT ua.id, ua.ticker, ua.condition, ua.target_price, u.email
+		SELECT ua.id, ua.ticker, ua.` + "`condition`" + `, ua.target_price, u.email
 		FROM user_alerts ua
 		JOIN users u ON ua.user_id = u.id
 		WHERE ua.is_active = 1

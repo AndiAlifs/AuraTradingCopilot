@@ -38,6 +38,24 @@ type AnalyzeRequest struct {
 	Ticker string `json:"ticker"`
 }
 
+func detectTradingEmotion(userMessage string) string {
+	msg := strings.ToLower(userMessage)
+	panicKeywords := []string{"crash", "sell everything", "tanking", "panic"}
+	fomoKeywords := []string{"moon", "all in", "miss out", "fomo", "rocket"}
+
+	for _, kw := range panicKeywords {
+		if strings.Contains(msg, kw) {
+			return "[System Note: User is exhibiting high emotion. Prioritize calming them down and grounding the analysis in fundamental/technical data]"
+		}
+	}
+	for _, kw := range fomoKeywords {
+		if strings.Contains(msg, kw) {
+			return "[System Note: User is exhibiting high emotion. Prioritize calming them down and grounding the analysis in fundamental/technical data]"
+		}
+	}
+	return ""
+}
+
 func AnalyzeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[analyze] %s %s", r.Method, r.URL.Path)
 	if r.Method != http.MethodPost {
@@ -98,10 +116,10 @@ func computeTA(h *YahooHistoryData) taResult {
 	lows := h.Lows
 
 	ta := taResult{
-		RSI:    calcRSI(closes, 14),
-		MA20:   calcSMA(closes, 20),
-		MA50:   calcSMA(closes, 50),
-		ATR:    calcATR(highs, lows, closes, 14),
+		RSI:  calcRSI(closes, 14),
+		MA20: calcSMA(closes, 20),
+		MA50: calcSMA(closes, 50),
+		ATR:  calcATR(highs, lows, closes, 14),
 	}
 
 	ta.MACD, ta.MACDSignal, ta.MACDHistogram = calcMACD(closes, 12, 26, 9)

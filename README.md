@@ -1,27 +1,66 @@
-# AuraTrade
+# 🤖 Aura — The Swing-Trade Co-Pilot
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.21.
+**Aura** is an agentic AI web application designed for retail stock investors focusing on short-term swing trades and **BSJP (Beli Sore Jual Pagi)** strategies on the Indonesian Stock Exchange (IDX).
 
-## Development server
+## 🌟 Executive Summary
+Aura utilizes a Retrieval-Augmented Generation (RAG) agentic workflow. She pulls live market data via RapidAPI, analyzes it using Google's **Gemini 3.1 Pro**, and outputs strict JSON to generate functional UI components for stock market strategies.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## 👩‍💼 Meet Aura
+Aura is your Lead System Architect & Quantitative Analyst. 
+- **Persona:** Hyper-logical, risk-averse, and highly structured. She speaks in technical certainties and probabilities.
+- **Visual Identity:** A professional financial analyst with a dark corporate blazer over a modern slim-fit batik shirt, fitting perfectly with the app's Dark mode (Slate-900/800) with Neon Green and Red accents.
 
-## Code scaffolding
+## 🏗️ Technical Architecture
+Aura uses a Vercel-optimized Monorepo to maintain security and performance.
+- **Frontend:** Angular 18
+- **Backend:** Go (Vercel Serverless Functions)
+- **AI Model:** Gemini 3.1 Pro
+- **Data Provider:** Yahoo Finance (via RapidAPI)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## 🚀 Getting Started
 
-## Build
+### Prerequisites
+- Node.js (v18 or higher)
+- Go (v1.21 or higher)
+- Angular CLI
+- Vercel CLI (recommended for local development)
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+### Environment Variables
+To run this project, the following keys must be configured in your environment (`.env` file or Vercel Environment Variables):
 
-## Running unit tests
+| Variable | Description |
+| :--- | :--- |
+| `GEMINI_API_KEY` | Your Google AI Studio API Key (for Gemini 3.1 Pro). |
+| `RAPIDAPI_KEY` | Your RapidAPI Key for Yahoo Finance data. |
+| `RAPIDAPI_HOST` | `yahoo-finance15.p.rapidapi.com` |
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+### Installation
+1. Clone the repository.
+2. Install frontend dependencies:
+   ```bash
+   npm install
+   ```
+3. Install backend Go modules:
+   ```bash
+   cd api
+   go mod tidy
+   ```
 
-## Running end-to-end tests
+### Running Locally (Development)
+Since the project relies on Angular for the frontend and Go for backend APIs routing, you can run the app locally using Vercel CLI to simulate the production environment:
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```bash
+vercel dev
+```
+Alternatively, run the Angular dev server (note: `/api` endpoints will use the `proxy.conf.json` configuration to forward requests to the Go server if running separately):
+```bash
+ng serve
+```
 
-## Further help
+## 📦 Build & Deployment
+Run `ng build` to build the Angular project.
+The project is configured to be deployed on **Vercel** out-of-the-box using the provided `vercel.json` routing configuration.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+```bash
+vercel --prod
+```

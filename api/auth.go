@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"strings"
@@ -181,4 +182,42 @@ func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		r.Header.Set("X-User-Email", email)
 		next.ServeHTTP(w, r)
 	}
+}
+
+type ProfileUpdateRequest struct {
+	RiskTolerance     string `json:"riskTolerance"`
+	PreferredStrategy string `json:"preferredStrategy"`
+}
+
+func UpdateProfileHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	email := r.Header.Get("X-User-Email")
+	if email == "" {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req ProfileUpdateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	db := GetDB()
+	_, err := db.Exec(
+		"UPDATE users SET risk_tolerance = ?, preferred_strategy = ? WHERE email = ?",
+		req.RiskTolerance, req.PreferredStrategy, email,
+	)
+	if err != nil {
+		log.Printf("[auth] profile update error: %v", err)
+		http.Error(w, "failed to update profile", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"success"}`))
 }

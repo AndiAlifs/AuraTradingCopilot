@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -122,6 +123,15 @@ var auraTools = []map[string]interface{}{
 
 // ── Handler ───────────────────────────────────────────────────────────────────
 
+func buildDynamicPersona(user User) string {
+	basePersona := "You are Aura, an empathetic stock trading assistant."
+	if user.RiskTolerance != "" || user.PreferredStrategy != "" {
+		basePersona += fmt.Sprintf("\n\nUser Profile:\n- Risk Tolerance: %s\n- Preferred Strategy: %s\n\nTailor your financial advice and psychological tone to these specific user parameters.", user.RiskTolerance, user.PreferredStrategy)
+	}
+	// Append the rest of the original system prompt so tools and rules still work
+	return basePersona + "\n\n" + auraSystemPrompt
+}
+
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("[chat] %s %s", r.Method, r.URL.Path)
 
@@ -144,6 +154,27 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	email := r.Header.Get("X-User-Email")
+	var currentUser User
+	var rt, ps, el sql.NullString
+	db := GetDB()
+	err := db.QueryRow("SELECT id, email, risk_tolerance, preferred_strategy, experience_level FROM users WHERE email = ?", email).
+		Scan(&currentUser.ID, &currentUser.Email, &rt, &ps, &el)
+	if err != nil {
+		log.Printf("[chat] WARNING: could not fetch user profile: %v", err)
+	} else {
+		currentUser.RiskTolerance = rt.String
+		currentUser.PreferredStrategy = ps.String
+		currentUser.ExperienceLevel = el.String
+	}
+
+	systemPrompt := buildDynamicPersona(currentUser)
+
+	emotionInstruction := detectTradingEmotion(req.Message)
+	if emotionInstruction != "" {
+		systemPrompt += "\n\n" + emotionInstruction
+	}
+
 	// Build Gemini history from simple conversation turns
 	contents := make([]gContent, 0, len(req.History)+1)
 	for _, turn := range req.History {
@@ -164,7 +195,7 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 		Parts: []gPart{{Text: req.Message}},
 	})
 
-	text, strategy, err := runAuraAgent(apiKey, contents)
+	text, strategy, err := runAuraAgent(apiKey, systemPrompt, contents)
 	if err != nil {
 		log.Printf("[chat] ERROR from agent: %v", err)
 		http.Error(w, "agent error: "+err.Error(), http.StatusInternalServerError)
@@ -177,11 +208,11 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 // ── Agent loop ────────────────────────────────────────────────────────────────
 
-func runAuraAgent(apiKey string, contents []gContent) (string, *StrategyCardData, error) {
+func runAuraAgent(apiKey string, systemPrompt string, contents []gContent) (string, *StrategyCardData, error) {
 	var strategy *StrategyCardData
 
 	for i := 0; i < 8; i++ {
-		resp, err := callGeminiChat(apiKey, contents)
+		resp, err := callGeminiChat(apiKey, systemPrompt, contents)
 		if err != nil {
 			return "", nil, err
 		}
@@ -287,7 +318,7 @@ func argFloat(args map[string]interface{}, key string) float64 {
 
 // ── Gemini API call ───────────────────────────────────────────────────────────
 
-func callGeminiChat(apiKey string, contents []gContent) (*gAPIResponse, error) {
+func callGeminiChat(apiKey string, systemPrompt string, contents []gContent) (*gAPIResponse, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=%s", apiKey)
 
 	log.Printf("[gemini/chat] → POST model=gemini-3.1-pro-preview turns=%d", len(contents))
@@ -310,7 +341,7 @@ func callGeminiChat(apiKey string, contents []gContent) (*gAPIResponse, error) {
 
 	payload := map[string]interface{}{
 		"system_instruction": map[string]interface{}{
-			"parts": []map[string]interface{}{{"text": auraSystemPrompt}},
+			"parts": []map[string]interface{}{{"text": systemPrompt}},
 		},
 		"contents": contents,
 		"tools":    auraTools,
