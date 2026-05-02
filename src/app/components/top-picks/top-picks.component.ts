@@ -17,7 +17,7 @@ import { TradeService, TopPick } from '../../services/trade.service';
                        transition-colors border border-slate-700/50 cursor-pointer whitespace-nowrap group">
           <span class="font-bold text-slate-200 text-sm">{{ pick.ticker | slice:0:-3 }}</span>
           <span class="text-xs font-mono" [class.text-auraGreen]="pick.percentChange >= 0" [class.text-auraRed]="pick.percentChange < 0">
-            {{ pick.currentPrice | number:'1.0-0' }}
+            Rp {{ pick.currentPrice | number:'1.0-0' }}
             <span>({{ pick.percentChange >= 0 ? '+' : '' }}{{ pick.percentChange | number:'1.1-1' }}%)</span>
           </span>
           <span *ngIf="pick.signal" class="text-xs px-1.5 py-0.5 rounded font-bold uppercase hidden group-hover:inline-block"

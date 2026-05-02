@@ -19,7 +19,7 @@ type TopPick struct {
 	Signal        string  `json:"signal"`
 }
 
-var topPicksTickers = []string{"BBCA.JK", "BBRI.JK", "BMRI.JK", "TLKM.JK", "ASII.JK", "BREN.JK", "GOTO.JK"}
+var topPicksTickers = []string{"BBCA.JK", "BBRI.JK", "BMRI.JK", "TLKM.JK", "ASII.JK", "BREN.JK", "GOTO.JK", "AMRT.JK", "ADRO.JK", "UNTR.JK", "KLBF.JK"}
 
 var (
 	topPicksCache     []TopPick

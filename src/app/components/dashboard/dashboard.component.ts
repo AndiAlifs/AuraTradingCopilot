@@ -135,6 +135,12 @@ import { TradeService, ScreenerResult, Alert } from '../../services/trade.servic
               </div>
             </div>
 
+            <!-- Footer Credit -->
+            <div class="pt-6 mt-6 border-t border-slate-800/50 text-[10px] text-slate-600 flex flex-col gap-1">
+              <p>&copy; 2026 Aura Trading Copilot</p>
+              <p>Made by <a href="https://andialifs.github.io/" target="_blank" class="text-auraNeon/60 hover:text-auraNeon transition-colors">Andi Alifsyah</a> (2025)</p>
+            </div>
+
           </div>
         </aside>
       </main>

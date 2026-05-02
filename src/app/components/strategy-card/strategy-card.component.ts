@@ -23,7 +23,7 @@ type Tab = 'trade' | 'ta' | 'risk';
             <p class="text-xs text-slate-400 uppercase tracking-widest mt-0.5 font-semibold">Aura Trade Setup</p>
           </div>
           <div class="text-right">
-            <div class="text-3xl font-mono text-white leading-tight">{{ data.entry | number:'1.0-0' }}</div>
+            <div class="text-3xl font-mono text-white leading-tight">Rp {{ data.entry | number:'1.0-0' }}</div>
             <p class="text-xs text-slate-400 uppercase mt-0.5">Entry</p>
           </div>
         </div>
@@ -59,7 +59,7 @@ type Tab = 'trade' | 'ta' | 'risk';
           <div class="grid grid-cols-2 gap-3">
             <div class="bg-slate-900/60 border border-slate-700/50 p-3 rounded-lg">
               <div class="text-xs text-slate-400 uppercase mb-1">Take Profit</div>
-              <div class="text-lg font-mono text-auraGreen font-bold">{{ data.takeProfit | number:'1.0-0' }}</div>
+              <div class="text-lg font-mono text-auraGreen font-bold">Rp {{ data.takeProfit | number:'1.0-0' }}</div>
               <div *ngIf="data.takeProfitJustification"
                 class="text-xs text-slate-500 mt-1 leading-snug">
                 {{ data.takeProfitJustification }}
@@ -67,7 +67,7 @@ type Tab = 'trade' | 'ta' | 'risk';
             </div>
             <div class="bg-slate-900/60 border border-slate-700/50 p-3 rounded-lg">
               <div class="text-xs text-slate-400 uppercase mb-1">Stop Loss</div>
-              <div class="text-lg font-mono text-auraRed font-bold">{{ data.stopLoss | number:'1.0-0' }}</div>
+              <div class="text-lg font-mono text-auraRed font-bold">Rp {{ data.stopLoss | number:'1.0-0' }}</div>
               <div *ngIf="data.stopLossJustification"
                 class="text-xs text-slate-500 mt-1 leading-snug">
                 {{ data.stopLossJustification }}
@@ -146,7 +146,7 @@ type Tab = 'trade' | 'ta' | 'risk';
               <div class="grid grid-cols-2 gap-4">
                 <div *ngIf="data.ma20">
                   <div class="text-xs text-slate-500 mb-0.5">MA 20</div>
-                  <div class="font-mono font-bold text-white">{{ data.ma20 | number:'1.0-0' }}</div>
+                  <div class="font-mono font-bold text-white">Rp {{ data.ma20 | number:'1.0-0' }}</div>
                   <div class="text-xs mt-0.5"
                     [class.text-auraGreen]="data.entry >= data.ma20"
                     [class.text-auraRed]="data.entry < data.ma20">
@@ -155,7 +155,7 @@ type Tab = 'trade' | 'ta' | 'risk';
                 </div>
                 <div *ngIf="data.ma50">
                   <div class="text-xs text-slate-500 mb-0.5">MA 50</div>
-                  <div class="font-mono font-bold text-white">{{ data.ma50 | number:'1.0-0' }}</div>
+                  <div class="font-mono font-bold text-white">Rp {{ data.ma50 | number:'1.0-0' }}</div>
                   <div class="text-xs mt-0.5"
                     [class.text-auraGreen]="data.entry >= data.ma50"
                     [class.text-auraRed]="data.entry < data.ma50">
@@ -169,7 +169,7 @@ type Tab = 'trade' | 'ta' | 'risk';
             <div *ngIf="data.atr" class="bg-slate-900/60 border border-slate-700/50 p-3 rounded-lg">
               <div class="flex justify-between">
                 <span class="text-xs text-slate-400 uppercase">ATR (14)</span>
-                <span class="font-mono font-bold text-white">{{ data.atr | number:'1.0-0' }}</span>
+                <span class="font-mono font-bold text-white">Rp {{ data.atr | number:'1.0-0' }}</span>
               </div>
               <div class="text-xs text-slate-500 mt-1">Average volatility per day</div>
             </div>
@@ -188,15 +188,15 @@ type Tab = 'trade' | 'ta' | 'risk';
           <div class="bg-slate-900/60 border border-slate-700/50 p-4 rounded-lg space-y-3">
             <div class="flex justify-between text-sm">
               <span class="text-slate-400">Entry Price</span>
-              <span class="font-mono font-bold text-white">{{ data.entry | number:'1.0-0' }}</span>
+              <span class="font-mono font-bold text-white">Rp {{ data.entry | number:'1.0-0' }}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-slate-400">Take Profit</span>
-              <span class="font-mono font-bold text-auraGreen">{{ data.takeProfit | number:'1.0-0' }}</span>
+              <span class="font-mono font-bold text-auraGreen">Rp {{ data.takeProfit | number:'1.0-0' }}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-slate-400">Stop Loss</span>
-              <span class="font-mono font-bold text-auraRed">{{ data.stopLoss | number:'1.0-0' }}</span>
+              <span class="font-mono font-bold text-auraRed">Rp {{ data.stopLoss | number:'1.0-0' }}</span>
             </div>
             <div class="border-t border-slate-700 pt-3 flex justify-between text-sm">
               <span class="text-slate-400">Reward / Risk</span>

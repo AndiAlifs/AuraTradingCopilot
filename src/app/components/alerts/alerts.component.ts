@@ -116,6 +116,11 @@ import { AuthService } from '../../services/auth.service';
           </ul>
         </div>
 
+        <!-- Footer Credit -->
+        <div class="mt-12 py-8 border-t border-auraBorder/30 text-center text-xs text-slate-600 flex flex-col gap-2">
+          <p>&copy; 2026 Aura Trading Copilot</p>
+          <p>Made by <a href="https://andialifs.github.io/" target="_blank" class="text-auraNeon/60 hover:text-auraNeon transition-colors font-medium">Andi Alifsyah</a> (2025)</p>
+        </div>
       </div>
     </div>
   `

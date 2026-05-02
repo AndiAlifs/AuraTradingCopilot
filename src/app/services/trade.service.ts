@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
 
 export interface ModelInfo {
   id: string;
@@ -85,7 +85,7 @@ export interface CreateAlertRequest {
 
 @Injectable({ providedIn: 'root' })
 export class TradeService {
-  private _chatInputFocus = new BehaviorSubject<string | null>(null);
+  private _chatInputFocus = new Subject<string>();
   chatInputFocus$ = this._chatInputFocus.asObservable();
 
   private _alertsChanged = new BehaviorSubject<void>(undefined);
@@ -148,6 +148,6 @@ export class TradeService {
   }
 
   clearChatTrigger() {
-    this._chatInputFocus.next(null);
+    // No longer needed with Subject
   }
 }

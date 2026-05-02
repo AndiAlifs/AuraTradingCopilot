@@ -68,6 +68,12 @@ function passwordsMatch(g: AbstractControl): ValidationErrors | null {
             <a routerLink="/login" class="text-auraNeon hover:underline ml-1">Sign in</a>
           </p>
         </form>
+
+        <!-- Footer Credit -->
+        <div class="mt-8 text-center text-[10px] text-slate-600 space-y-1">
+          <p>&copy; 2026 Aura Trading Copilot</p>
+          <p>Made by <a href="https://andialifs.github.io/" target="_blank" class="text-auraNeon/60 hover:text-auraNeon transition-colors">Andi Alifsyah</a> (2025)</p>
+        </div>
       </div>
     </div>
   `

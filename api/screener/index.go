@@ -15,6 +15,8 @@ var idxUniverse = []string{
 	"BREN.JK", "GOTO.JK", "UNVR.JK", "ICBP.JK", "HMSP.JK",
 	"INDF.JK", "SMGR.JK", "ANTM.JK", "PTBA.JK", "ADRO.JK",
 	"INCO.JK", "BUMI.JK", "MEDC.JK", "PGAS.JK", "KLBF.JK",
+	"AMRT.JK", "AKRA.JK", "BRPT.JK", "CPIN.JK", "INKP.JK",
+	"ITMG.JK", "MDKA.JK", "UNTR.JK", "TPIA.JK", "BYAN.JK",
 }
 
 type ScreenerResult struct {

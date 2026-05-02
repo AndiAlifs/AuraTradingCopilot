@@ -79,7 +79,7 @@ interface ChatMessage {
                class="w-32 h-32 rounded-full mx-auto mb-4 border-2 border-slate-700 shadow-lg object-cover"
                onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'128\\' height=\\'128\\'><rect width=\\'128\\' height=\\'128\\' fill=\\'%231e293b\\'/><text x=\\'64\\' y=\\'80\\' font-size=\\'48\\' font-family=\\'sans-serif\\' text-anchor=\\'middle\\' fill=\\'%234ade80\\'>A</text></svg>'">
           <h2 class="text-2xl font-light text-slate-300 tracking-wide">Hi, I'm <span class="font-bold text-auraGreen">Aura</span>.</h2>
-          <p class="text-slate-500 mt-2">Your personal trading assistant. Ask me anything about the market.</p>
+          <p class="text-slate-500 mt-2">Your personal IDX trading assistant. Ask me anything about Indonesian stocks.</p>
         </div>
 
         <div *ngFor="let msg of messages"
@@ -120,7 +120,7 @@ interface ChatMessage {
           <input type="text" [(ngModel)]="inputMessage" name="inputMessage"
                  #chatInput
                  class="w-full bg-slate-800 border border-slate-700 text-white rounded-full pl-5 pr-12 py-3 focus:outline-none focus:border-auraGreen focus:ring-1 focus:ring-auraGreen transition-all shadow-inner"
-                 placeholder="Ask Aura anything — or just drop a ticker...">
+                 placeholder="Enter IDX ticker (e.g., BBCA, GOTO) or ask Aura a question...">
           <button type="submit"
                   [disabled]="!inputMessage.trim() || isAnalyzing"
                   class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-auraGreen text-slate-900 rounded-full hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
@@ -195,12 +195,13 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
     this.tradeService.chatInputFocus$.subscribe(ticker => {
       if (ticker) {
-        this.inputMessage = `What's the setup for ${ticker}?`;
+        this.inputMessage = `Give me the trade setup for ${ticker}`;
         setTimeout(() => {
-          this.chatInput.nativeElement.focus();
+          if (this.chatInput) {
+            this.chatInput.nativeElement.focus();
+          }
           this.sendMessage();
-        }, 0);
-        this.tradeService.clearChatTrigger();
+        }, 300); // 300ms delay to allow view to stabilize
       }
     });
   }
