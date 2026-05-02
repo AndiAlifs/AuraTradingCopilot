@@ -15,8 +15,11 @@ interface ChatMessage {
   selector: 'app-chat',
   standalone: true,
   imports: [CommonModule, FormsModule, StrategyCardComponent],
+  host: {
+    class: 'flex flex-col flex-1 overflow-hidden'
+  },
   template: `
-    <div class="flex flex-col h-full bg-slate-900 w-full max-w-4xl mx-auto border-x border-slate-800 shadow-2xl relative">
+    <div class="flex flex-col flex-1 overflow-hidden bg-slate-900 w-full max-w-4xl mx-auto border-x border-slate-800 shadow-2xl relative">
       <div class="flex-1 overflow-y-auto p-6 space-y-6" #scrollContainer>
 
         <div class="text-center py-10 opacity-80">

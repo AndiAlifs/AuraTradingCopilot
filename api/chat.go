@@ -287,14 +287,30 @@ func executeTool(fc gFuncCall) (map[string]interface{}, *StrategyCardData) {
 		return quote, nil
 
 	case "generate_trade_setup":
+		ticker := argString(fc.Args, "ticker")
 		setup := &StrategyCardData{
-			Ticker:     argString(fc.Args, "ticker"),
+			Ticker:     ticker,
 			Confidence: int(argFloat(fc.Args, "confidence")),
 			Entry:      argFloat(fc.Args, "entry"),
 			TakeProfit: argFloat(fc.Args, "takeProfit"),
 			StopLoss:   argFloat(fc.Args, "stopLoss"),
 			Rationale:  argString(fc.Args, "rationale"),
 		}
+		
+		if !strings.HasSuffix(strings.ToUpper(ticker), ".JK") {
+			ticker = strings.ToUpper(ticker) + ".JK"
+		}
+		if hist, err := fetchYahooHistory(ticker, 60); err == nil {
+			ta := computeTA(hist)
+			setup.RSI = ta.RSI
+			setup.MACD = ta.MACD
+			setup.MACDSignal = ta.MACDSignal
+			setup.MACDHistogram = ta.MACDHistogram
+			setup.MA20 = ta.MA20
+			setup.MA50 = ta.MA50
+			setup.ATR = ta.ATR
+		}
+
 		return map[string]interface{}{"status": "card displayed to user"}, setup
 	}
 
