@@ -114,11 +114,23 @@ func analyzeWithGemini(apiKey, model, ticker string, hist *yahoo.YahooHistoryDat
 		"suggestedStop": stopLoss, "suggestedTP": takeProfit,
 	})
 
-	prompt := fmt.Sprintf(`You are Aura, an analyst for IDX swing trading. Respond ONLY with valid JSON:
+	prompt := fmt.Sprintf(`You are Aura, the Lead System Architect & Quantitative Analyst for Aura Trading Copilot.
+You specialize in IDX swing trading and the BSJP strategy.
+
+Your task is to analyze the following market data for %s and output a strict JSON strategy setup.
+Persona: Hyper-logical, authoritative, and concise.
+
+IDX BSJP Rules:
+- Buy near close, sell near open.
+- Target: 1-5%%.
+- Stop: 2-3%%.
+
+Data: %s
+
+Respond ONLY with valid JSON in this format:
 {
-  "ticker": "%s", "confidence": number, "entry": number, "takeProfit": number, "stopLoss": number, "rationale": "string"
-}
-Data: %s`, ticker, string(taJSON))
+  "ticker": "%s", "confidence": number, "entry": number, "takeProfit": number, "stopLoss": number, "rationale": "2-sentence technical rationale"
+}`, ticker, string(taJSON), ticker)
 
 	if models.ProviderOf(model) == "ollama" {
 		rawText, err := ollama.CallOllamaChat(model, "", []models.GContent{{Role: "user", Parts: []models.GPart{{Text: prompt}}}})
