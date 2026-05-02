@@ -3,7 +3,25 @@
 @tailwind utilities;
 
 body {
-  @apply bg-slate-900 text-slate-100;
+  @apply bg-auraDark text-slate-200;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', monospace;
+}
+
+::selection {
+  @apply bg-auraNeon text-auraDark;
+}
+
+/* Custom Scrollbar for Terminal aesthetic */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-auraDark;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-auraBorder rounded;
+}
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-auraNeon;
 }
