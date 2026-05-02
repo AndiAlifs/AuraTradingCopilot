@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"aura-trade/internal/db"
+	"aura-trade/pkg/db"
 )
 
 type Alert struct {

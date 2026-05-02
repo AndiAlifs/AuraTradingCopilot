@@ -18,7 +18,7 @@ import (
 	"aura-trade/api/screener"
 	toppicks "aura-trade/api/top-picks"
 
-	"aura-trade/internal/db"
+	"aura-trade/pkg/db"
 )
 
 func main() {

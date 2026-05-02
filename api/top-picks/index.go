@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"aura-trade/internal/yahoo"
+	"aura-trade/pkg/yahoo"
 )
 
 type TopPick struct {

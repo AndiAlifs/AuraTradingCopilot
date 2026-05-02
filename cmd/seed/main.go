@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"aura-trade/internal/db"
+	"aura-trade/pkg/db"
 
 	"golang.org/x/crypto/bcrypt"
 )

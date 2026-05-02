@@ -22,3 +22,13 @@
 {"time":"2026-05-02T20:14:16+07:00","level":"ERROR","handler":"chat","model":"glm-5.1","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: 0f4c1443-3c8d-4054-9cf3-978d70dabc36)","duration_ms":437}
 {"time":"2026-05-02T20:14:19+07:00","level":"INFO","handler":"chat","model":"kimi-k2.6","message":"What's the setup for BMRI.JK?"}
 {"time":"2026-05-02T20:14:20+07:00","level":"ERROR","handler":"chat","model":"kimi-k2.6","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: fa169149-4a6b-4583-9df9-4521a7a6356f)","duration_ms":1165}
+{"time":"2026-05-02T20:26:16+07:00","level":"INFO","handler":"chat","model":"kimi-k2.6","message":"helo"}
+{"time":"2026-05-02T20:26:17+07:00","level":"ERROR","handler":"chat","model":"kimi-k2.6","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: 42d3216e-fda2-480f-9a4a-cc833940cc55)","duration_ms":485}
+{"time":"2026-05-02T20:26:22+07:00","level":"INFO","handler":"chat","model":"glm-5.1","message":"hello"}
+{"time":"2026-05-02T20:26:23+07:00","level":"ERROR","handler":"chat","model":"glm-5.1","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: c515eea0-2d7e-44a3-bad8-435661f79805)","duration_ms":451}
+{"time":"2026-05-02T20:26:33+07:00","level":"INFO","handler":"chat","model":"gemma4","message":"halo"}
+{"time":"2026-05-02T20:26:33+07:00","level":"ERROR","handler":"chat","model":"gemma4","error":"Ollama error: model 'gemma4' not found","duration_ms":437}
+{"time":"2026-05-02T20:26:38+07:00","level":"INFO","handler":"chat","model":"deepseek-v4-pro","message":"cuaks"}
+{"time":"2026-05-02T20:26:39+07:00","level":"ERROR","handler":"chat","model":"deepseek-v4-pro","error":"Ollama error: this model requires a subscription, upgrade for access: https://ollama.com/upgrade (ref: a06bef8c-070d-4414-b297-aac6b9c82582)","duration_ms":441}
+{"time":"2026-05-02T20:26:56+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","message":"What's the setup for BREN.JK?"}
+{"time":"2026-05-02T20:27:11+07:00","level":"INFO","handler":"chat","model":"gemini-2.5-pro","response_snippet":"Of course. Let me analyze the chart for Prajogo Pangestu's Barito Renewables Energy.\n\nHere is the current swing trading setup for BREN.JK:\n\n*   **Ticker**: BREN.JK\n*   **Strategy**: Buy on Weakness / …","duration_ms":15255}

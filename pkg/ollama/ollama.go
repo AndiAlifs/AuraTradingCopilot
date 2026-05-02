@@ -10,7 +10,7 @@ import (
 	"os"
 	"strings"
 
-	"aura-trade/internal/models"
+	"aura-trade/pkg/models"
 )
 
 // ollamaBaseURL is the Ollama local server address.

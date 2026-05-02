@@ -2,7 +2,7 @@ package db
 
 import (
 	"log"
-	"aura-trade/internal/yahoo"
+	"aura-trade/pkg/yahoo"
 )
 
 func CheckAlerts() {

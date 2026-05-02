@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"aura-trade/internal/models"
+	"aura-trade/pkg/models"
 )
 
 func Handler(w http.ResponseWriter, r *http.Request) {

@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"aura-trade/internal/db"
-	"aura-trade/internal/auth"
+	"aura-trade/pkg/db"
+	"aura-trade/pkg/auth"
 )
 
 type ProfileUpdateRequest struct {

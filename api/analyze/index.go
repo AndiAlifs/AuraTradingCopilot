@@ -10,10 +10,10 @@ import (
 	"strings"
 	"time"
 
-	"aura-trade/internal/logger"
-	"aura-trade/internal/models"
-	"aura-trade/internal/ollama"
-	"aura-trade/internal/yahoo"
+	"aura-trade/pkg/logger"
+	"aura-trade/pkg/models"
+	"aura-trade/pkg/ollama"
+	"aura-trade/pkg/yahoo"
 )
 
 type AnalyzeRequest struct {

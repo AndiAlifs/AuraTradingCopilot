@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"aura-trade/internal/yahoo"
+	"aura-trade/pkg/yahoo"
 )
 
 var idxUniverse = []string{

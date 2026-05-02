@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strings"
 
-	"aura-trade/internal/db"
-	"aura-trade/internal/auth"
+	"aura-trade/pkg/db"
+	"aura-trade/pkg/auth"
 
 	"golang.org/x/crypto/bcrypt"
 )
