@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
 
 export interface StrategyCardData {
   ticker: string;
@@ -79,7 +79,7 @@ export interface CreateAlertRequest {
 
 @Injectable({ providedIn: 'root' })
 export class TradeService {
-  private _chatInputFocus = new Subject<string>();
+  private _chatInputFocus = new BehaviorSubject<string | null>(null);
   chatInputFocus$ = this._chatInputFocus.asObservable();
 
   constructor(private http: HttpClient) {}
@@ -121,5 +121,9 @@ export class TradeService {
 
   triggerChatWithTicker(ticker: string) {
     this._chatInputFocus.next(ticker);
+  }
+
+  clearChatTrigger() {
+    this._chatInputFocus.next(null);
   }
 }

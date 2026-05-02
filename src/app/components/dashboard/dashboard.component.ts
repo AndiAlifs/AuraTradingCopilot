@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TopPicksComponent } from '../top-picks/top-picks.component';
 import { ChatComponent } from '../chat/chat.component';
 import { AuthService } from '../../services/auth.service';
+import { TradeService, ScreenerResult, Alert } from '../../services/trade.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -54,18 +55,118 @@ import { AuthService } from '../../services/auth.service';
       <!-- Ticker bar -->
       <app-top-picks></app-top-picks>
 
-      <!-- Chat area -->
-      <main class="flex-1 overflow-hidden">
-        <app-chat></app-chat>
+      <main class="flex-1 overflow-hidden flex bg-slate-950">
+        <!-- Chat area -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+          <app-chat></app-chat>
+        </div>
+
+        <!-- Right Panel (Market Pulse / Dashboard widgets) -->
+        <aside class="w-80 lg:w-96 border-l border-auraBorder bg-auraPanel flex flex-col overflow-y-auto hidden md:flex shrink-0">
+          <div class="p-5 space-y-6">
+            
+            <!-- Quick Stats -->
+            <div>
+              <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">Market Pulse</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-3">
+                  <div class="text-slate-500 text-xs mb-1">Active Alerts</div>
+                  <div class="text-xl font-mono text-white">{{ alerts.length }}</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-lg p-3">
+                  <div class="text-slate-500 text-xs mb-1">Bullish Setups</div>
+                  <div class="text-xl font-mono text-auraGreen">{{ bullishStocks.length }}</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Bullish Screener Preview -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Bullish Movers</h3>
+                <a routerLink="/screener" class="text-xs text-auraNeon hover:text-cyan-300">View All</a>
+              </div>
+              <div class="space-y-2">
+                <div *ngIf="bullishStocks.length === 0 && !loading" class="text-sm text-slate-500 italic">No bullish signals found.</div>
+                <div *ngIf="loading" class="text-sm text-slate-500 italic">Loading...</div>
+                <div *ngFor="let s of bullishStocks" class="bg-slate-900 border border-slate-800 rounded-lg p-3 hover:border-slate-600 transition-colors cursor-pointer group" (click)="analyze(s.ticker)">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="font-mono font-bold text-white group-hover:text-auraNeon transition-colors">{{ s.ticker }}</span>
+                    <span class="font-mono text-sm" [class.text-auraGreen]="s.percentChange >= 0" [class.text-auraRed]="s.percentChange < 0">
+                      {{ s.percentChange >= 0 ? '+' : '' }}{{ s.percentChange | number:'1.2-2' }}%
+                    </span>
+                  </div>
+                  <div class="flex justify-between items-center text-xs text-slate-400">
+                    <span>{{ s.currentPrice | number:'1.0-0' }} IDR</span>
+                    <span>Vol: {{ (s.volume / 1000000) | number:'1.1-1' }}M</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Alerts -->
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest">Your Alerts</h3>
+                <a routerLink="/alerts" class="text-xs text-auraNeon hover:text-cyan-300">Manage</a>
+              </div>
+              <div class="space-y-2">
+                <div *ngIf="alerts.length === 0 && !loadingAlerts" class="text-sm text-slate-500 italic">No active alerts.</div>
+                <div *ngIf="loadingAlerts" class="text-sm text-slate-500 italic">Loading...</div>
+                <div *ngFor="let a of alerts" class="bg-slate-900 border border-slate-800 rounded-lg p-3">
+                  <div class="flex justify-between items-center mb-1">
+                    <span class="font-mono font-bold text-white">{{ a.ticker }}</span>
+                    <span class="text-xs text-slate-500">{{ a.createdAt | date:'MMM d' }}</span>
+                  </div>
+                  <div class="text-xs text-slate-400">
+                    <span [class.text-auraGreen]="a.condition === 'above'" [class.text-auraRed]="a.condition === 'below'">{{ a.condition }}</span>
+                    <span class="font-mono ml-1 text-white">{{ a.targetPrice | number:'1.0-0' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </aside>
       </main>
     </div>
   `,
   styleUrl: './dashboard.component.css'
 })
-export class DashboardComponent {
-  constructor(private auth: AuthService) {}
+export class DashboardComponent implements OnInit {
+  bullishStocks: ScreenerResult[] = [];
+  alerts: Alert[] = [];
+  loading = false;
+  loadingAlerts = false;
+
+  constructor(private auth: AuthService, private trade: TradeService) {}
 
   get email() { return this.auth.email; }
 
+  ngOnInit() {
+    this.loading = true;
+    this.trade.screen({ signal: 'bullish' }).subscribe({
+      next: (res) => {
+        this.bullishStocks = res.slice(0, 5); // top 5 bullish
+        this.loading = false;
+      },
+      error: () => this.loading = false
+    });
+
+    this.loadingAlerts = true;
+    this.trade.getAlerts().subscribe({
+      next: (res) => {
+        this.alerts = res.slice(0, 5); // top 5 alerts
+        this.loadingAlerts = false;
+      },
+      error: () => this.loadingAlerts = false
+    });
+  }
+
   logout() { this.auth.logout(); }
+
+  analyze(ticker: string) {
+    this.trade.triggerChatWithTicker(ticker);
+  }
 }
+

@@ -95,8 +95,14 @@ export class ChatComponent implements OnInit, AfterViewChecked {
 
   ngOnInit() {
     this.tradeService.chatInputFocus$.subscribe(ticker => {
-      this.inputMessage = `What's the setup for ${ticker}?`;
-      this.chatInput.nativeElement.focus();
+      if (ticker) {
+        this.inputMessage = `What's the setup for ${ticker}?`;
+        setTimeout(() => {
+          this.chatInput.nativeElement.focus();
+          this.sendMessage();
+        }, 0);
+        this.tradeService.clearChatTrigger();
+      }
     });
   }
 
