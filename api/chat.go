@@ -296,7 +296,7 @@ func executeTool(fc gFuncCall) (map[string]interface{}, *StrategyCardData) {
 			StopLoss:   argFloat(fc.Args, "stopLoss"),
 			Rationale:  argString(fc.Args, "rationale"),
 		}
-		
+
 		if !strings.HasSuffix(strings.ToUpper(ticker), ".JK") {
 			ticker = strings.ToUpper(ticker) + ".JK"
 		}

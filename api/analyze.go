@@ -22,7 +22,7 @@ type StrategyCardData struct {
 	StopLoss   float64 `json:"stopLoss"`
 	Rationale  string  `json:"rationale"`
 
-	// Technical Analysis (populated by /api/analyze, not the chat tool)
+	// Technical Analysis
 	RSI                     float64 `json:"rsi,omitempty"`
 	MACD                    float64 `json:"macd,omitempty"`
 	MACDSignal              float64 `json:"macdSignal,omitempty"`

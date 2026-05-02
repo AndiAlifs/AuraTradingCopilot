@@ -9,7 +9,7 @@ export interface StrategyCardData {
   takeProfit: number;
   stopLoss: number;
   rationale: string;
-  // Technical Analysis (populated by /api/analyze)
+  // Technical Analysis
   rsi?: number;
   macd?: number;
   macdSignal?: number;
