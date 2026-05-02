@@ -4,8 +4,8 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start:api": "cd api && go run cmd/server/main.go",
-    "seed:api": "cd api && go run cmd/seed/main.go",
+    "start:api": "go run cmd/server/main.go",
+    "seed:api": "go run cmd/seed/main.go",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",

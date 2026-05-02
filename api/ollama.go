@@ -85,7 +85,16 @@ func callOllamaChat(model, systemPrompt string, contents []gContent) (string, er
 	url := ollamaBaseURL() + "/api/chat"
 	log.Printf("[ollama/chat] → POST model=%s turns=%d", model, len(messages))
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	httpReq, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	if err != nil {
+		return "", err
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+	if key := os.Getenv("OLLAMA_API_KEY"); key != "" {
+		httpReq.Header.Set("Authorization", "Bearer "+key)
+	}
+
+	resp, err := http.DefaultClient.Do(httpReq)
 	if err != nil {
 		log.Printf("[ollama/chat] ✗ network error: %v", err)
 		return "", fmt.Errorf("failed to reach Ollama at %s — is it running? (%v)", ollamaBaseURL(), err)
