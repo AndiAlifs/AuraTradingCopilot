@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	api "aura-trade"
+	api "aura-trade/api"
 )
 
 func main() {
@@ -68,7 +68,7 @@ func cors(next http.HandlerFunc) http.HandlerFunc {
 // loadDotEnv reads the project-root .env (two levels above this file's package).
 // The server is expected to be run from the api/ directory: go run ./cmd/server/
 func loadDotEnv() {
-	data, err := os.ReadFile("../.env")
+	data, err := os.ReadFile(".env")
 	if err != nil {
 		return
 	}

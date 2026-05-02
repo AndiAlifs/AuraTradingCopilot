@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	api "aura-trade"
+	api "aura-trade/api"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -86,7 +86,7 @@ func seedData(db *sql.DB) {
 
 // loadDotEnv reads the project-root .env (two levels above this file's package).
 func loadDotEnv() {
-	data, err := os.ReadFile("../.env")
+	data, err := os.ReadFile(".env")
 	if err != nil {
 		return
 	}
