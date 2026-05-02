@@ -140,10 +140,13 @@ export class ChatComponent implements OnInit, AfterViewChecked {
           this.messages.push({ role: 'aura', text: "I didn't get a clear response. Try again." });
         }
       },
-      error: () => {
+      error: (err) => {
         this.messages = this.messages.filter(m => !m.isAnalyzing);
         this.isAnalyzing = false;
-        this.messages.push({ role: 'aura', text: "Something went wrong on my end — check that the backend is running and try again." });
+        const msg = err?.status === 401
+          ? "You need to sign in to use Aura. Head to /login to get started."
+          : "Something went wrong on my end — check that the backend is running and try again.";
+        this.messages.push({ role: 'aura', text: msg });
       }
     });
   }

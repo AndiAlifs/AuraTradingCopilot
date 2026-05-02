@@ -285,92 +285,28 @@ func argFloat(args map[string]interface{}, key string) float64 {
 	return 0
 }
 
-// ── Yahoo Finance ─────────────────────────────────────────────────────────────
-
-func fetchYahooQuote(ticker string) (map[string]interface{}, error) {
-	url := fmt.Sprintf("https://query1.finance.yahoo.com/v8/finance/chart/%s?interval=1d&range=5d", ticker)
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, fmt.Errorf("could not reach Yahoo Finance: %v", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	var yr struct {
-		Chart struct {
-			Result []struct {
-				Meta struct {
-					Symbol              string  `json:"symbol"`
-					RegularMarketPrice  float64 `json:"regularMarketPrice"`
-					ChartPreviousClose  float64 `json:"chartPreviousClose"`
-					RegularMarketVolume int64   `json:"regularMarketVolume"`
-					Currency            string  `json:"currency"`
-					FiftyTwoWeekHigh    float64 `json:"fiftyTwoWeekHigh"`
-					FiftyTwoWeekLow     float64 `json:"fiftyTwoWeekLow"`
-				} `json:"meta"`
-				Indicators struct {
-					Quote []struct {
-						Close  []float64 `json:"close"`
-						High   []float64 `json:"high"`
-						Low    []float64 `json:"low"`
-						Volume []int64   `json:"volume"`
-					} `json:"quote"`
-				} `json:"indicators"`
-			} `json:"result"`
-			Error interface{} `json:"error"`
-		} `json:"chart"`
-	}
-
-	if err := json.Unmarshal(body, &yr); err != nil {
-		return nil, fmt.Errorf("failed to parse Yahoo Finance response")
-	}
-	if len(yr.Chart.Result) == 0 {
-		return nil, fmt.Errorf("no data found for %s — check the ticker symbol", ticker)
-	}
-
-	meta := yr.Chart.Result[0].Meta
-	changePercent := 0.0
-	if meta.ChartPreviousClose > 0 {
-		changePercent = ((meta.RegularMarketPrice - meta.ChartPreviousClose) / meta.ChartPreviousClose) * 100
-	}
-
-	var recentCloses []float64
-	if len(yr.Chart.Result[0].Indicators.Quote) > 0 {
-		for _, c := range yr.Chart.Result[0].Indicators.Quote[0].Close {
-			if c > 0 {
-				recentCloses = append(recentCloses, c)
-			}
-		}
-	}
-
-	return map[string]interface{}{
-		"ticker":        meta.Symbol,
-		"currentPrice":  meta.RegularMarketPrice,
-		"previousClose": meta.ChartPreviousClose,
-		"changePercent": fmt.Sprintf("%.2f%%", changePercent),
-		"volume":        meta.RegularMarketVolume,
-		"currency":      meta.Currency,
-		"52weekHigh":    meta.FiftyTwoWeekHigh,
-		"52weekLow":     meta.FiftyTwoWeekLow,
-		"recentCloses":  recentCloses,
-	}, nil
-}
-
 // ── Gemini API call ───────────────────────────────────────────────────────────
 
 func callGeminiChat(apiKey string, contents []gContent) (*gAPIResponse, error) {
 	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-pro-preview:generateContent?key=%s", apiKey)
+
+	log.Printf("[gemini/chat] → POST model=gemini-3.1-pro-preview turns=%d", len(contents))
+	if len(contents) > 0 {
+		last := contents[len(contents)-1]
+		if len(last.Parts) > 0 {
+			if last.Parts[0].FunctionResponse != nil {
+				log.Printf("[gemini/chat]   last %s: functionResponse name=%s", last.Role, last.Parts[0].FunctionResponse.Name)
+			} else if last.Parts[0].FunctionCall != nil {
+				log.Printf("[gemini/chat]   last %s: functionCall name=%s", last.Role, last.Parts[0].FunctionCall.Name)
+			} else if t := last.Parts[0].Text; t != "" {
+				preview := t
+				if len(preview) > 120 {
+					preview = preview[:120] + "..."
+				}
+				log.Printf("[gemini/chat]   last %s: %q", last.Role, preview)
+			}
+		}
+	}
 
 	payload := map[string]interface{}{
 		"system_instruction": map[string]interface{}{
@@ -391,9 +327,11 @@ func callGeminiChat(apiKey string, contents []gContent) (*gAPIResponse, error) {
 
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if err != nil {
+		log.Printf("[gemini/chat] ✗ network error: %v", err)
 		return nil, fmt.Errorf("failed to call Gemini API: %v", err)
 	}
 	defer resp.Body.Close()
+	log.Printf("[gemini/chat] ← %d", resp.StatusCode)
 
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -402,10 +340,24 @@ func callGeminiChat(apiKey string, contents []gContent) (*gAPIResponse, error) {
 
 	var apiResp gAPIResponse
 	if err := json.Unmarshal(respBody, &apiResp); err != nil {
+		log.Printf("[gemini/chat] ✗ parse error, raw body: %s", string(respBody))
 		return nil, fmt.Errorf("failed to parse Gemini response: %s", string(respBody))
 	}
 	if apiResp.Error != nil {
+		log.Printf("[gemini/chat] ✗ API error: %s", apiResp.Error.Message)
 		return nil, fmt.Errorf("Gemini API error: %s", apiResp.Error.Message)
+	}
+
+	if len(apiResp.Candidates) > 0 {
+		c := apiResp.Candidates[0]
+		funcCalls := 0
+		for _, p := range c.Content.Parts {
+			if p.FunctionCall != nil {
+				funcCalls++
+				log.Printf("[gemini/chat]   funcCall: %s args=%v", p.FunctionCall.Name, p.FunctionCall.Args)
+			}
+		}
+		log.Printf("[gemini/chat]   finish=%s parts=%d funcCalls=%d", c.FinishReason, len(c.Content.Parts), funcCalls)
 	}
 
 	return &apiResp, nil

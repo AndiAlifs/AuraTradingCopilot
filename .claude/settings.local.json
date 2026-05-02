@@ -2,7 +2,17 @@
   "permissions": {
     "allow": [
       "Bash(go build *)",
-      "WebFetch(domain:ai.google.dev)"
+      "WebFetch(domain:ai.google.dev)",
+      "Bash(Get-ChildItem -Path \"C:\\\\projects\\\\AuraTradingCopilot\" -Force)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(dir \"C:\\\\projects\\\\AuraTradingCopilot/api\")",
+      "Bash(go mod *)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\projects\\\\AuraTradingCopilot\\\\src\\\\app\\\\interceptors\")",
+      "Bash(Out-Null)",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\projects\\\\AuraTradingCopilot\\\\src\\\\app\\\\guards\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\projects\\\\AuraTradingCopilot\\\\src\\\\app\\\\components\\\\auth\\\\login\")",
+      "Bash(New-Item -ItemType Directory -Force -Path \"C:\\\\projects\\\\AuraTradingCopilot\\\\src\\\\app\\\\components\\\\auth\\\\register\")"
     ]
   }
 }
