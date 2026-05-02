@@ -8,7 +8,7 @@ import { ChatComponent } from '../chat/chat.component';
   standalone: true,
   imports: [CommonModule, TopPicksComponent, ChatComponent],
   template: `
-    <div class="flex flex-col h-screen bg-slate-950 font-sans text-slate-200">
+    <div class="flex flex-col h-full bg-slate-950 font-sans text-slate-200">
       <app-top-picks></app-top-picks>
       <main class="flex-1 overflow-hidden">
         <app-chat></app-chat>
